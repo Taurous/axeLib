@@ -36,6 +36,9 @@ int main(int argc, char ** argv)
 
 	//m_states.changeState(std::unique_ptr<axe::AbstractState>(new SplashState(m_states, m_input, m_events, m_draw)));
 
+	axe::Timer clean_timer;
+	clean_timer.start();
+
 	m_events.startTimer();
 	while (m_states.running())
 	{
@@ -51,8 +54,7 @@ int main(int argc, char ** argv)
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
 				//m_states.update();
-				m_draw.bitmaps.removeUnreferencedResources();
-				m_draw.fonts.removeUnreferencedResources();
+				
 			}
 		}
 
@@ -63,7 +65,14 @@ int main(int argc, char ** argv)
 			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
 		}
 
-		m_states.cleanStates();
+		if (clean_timer.elapsed().count() / 1000 > 5)
+		{
+			clean_timer.restart();
+			printf("Cleaning...\n");
+			m_draw.bitmaps.removeUnreferencedResources();
+			m_draw.fonts.removeUnreferencedResources();
+			m_states.cleanStates();
+		}
 	}
 
 	s.set("width", m_draw.getWindowWidth());

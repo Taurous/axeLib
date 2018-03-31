@@ -10,14 +10,16 @@ namespace axe
 		FPSObject();
 		~FPSObject();
 
-		void calculateAverageFps(void);
-		double getAverageFps(void);
+		void calculateAverageFps();
+		double getAverageFps();
+
+		void dumpArray();
 
 	private:
 		axe::Timer t;
 
 		m_secs elapsed;
-		m_secs *arr_of_frame_times;
+		long long *arr_of_frame_times;
 
 		double fps;
 

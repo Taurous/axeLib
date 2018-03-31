@@ -7,6 +7,8 @@
 #include "StateManager.h"
 #include "SettingsHandler.h"
 
+#include "util\FPS.h"
+
 int main(int argc, char ** argv)
 {
 	axe::InputHandler m_input;
@@ -16,7 +18,7 @@ int main(int argc, char ** argv)
 
 	int windowWidth = 1280;
 	int windowHeight = 768;
-	std::string windName = "axeLib v0.0.1 Test";
+	std::string windName = "axeLib v0.5.0 Test";
 
 	axe::SettingsHandler s;
 
@@ -39,6 +41,8 @@ int main(int argc, char ** argv)
 	axe::Timer clean_timer;
 	clean_timer.start();
 
+	axe::FPSObject fpso;
+
 	m_events.startTimer();
 	while (m_states.running())
 	{
@@ -54,7 +58,6 @@ int main(int argc, char ** argv)
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
 				//m_states.update();
-				
 			}
 		}
 
@@ -63,12 +66,12 @@ int main(int argc, char ** argv)
 			//m_states.draw();
 
 			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
+			fpso.calculateAverageFps();
 		}
 
 		if (clean_timer.elapsed().count() / 1000 > 5)
 		{
 			clean_timer.restart();
-			printf("Cleaning...\n");
 			m_draw.bitmaps.removeUnreferencedResources();
 			m_draw.fonts.removeUnreferencedResources();
 			m_states.cleanStates();

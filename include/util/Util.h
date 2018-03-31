@@ -1,5 +1,7 @@
 #pragma once
 
+#include <allegro5\allegro.h>
+
 #include <type_traits>
 
 namespace axe
@@ -20,5 +22,14 @@ namespace axe
 	{
 		static_assert(std::is_integral<T>::value, "Cannot do bitwise operations on non-integral type!\n");
 		bitfield = flag ? bitfield | bit : ~(~bitfield | bit);
+	}
+
+	const inline int allegro_init()
+	{
+		if (!al_is_system_installed())
+		{
+			return al_init();
+		}
+		else return 0;
 	}
 }

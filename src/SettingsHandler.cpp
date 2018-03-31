@@ -9,6 +9,7 @@ SettingsHandler::SettingsHandler()
 
 SettingsHandler::~SettingsHandler()
 {
+	m_ints.clear();
 	m_bools.clear();
 	m_doubles.clear();
 	m_strings.clear();
@@ -18,6 +19,7 @@ void SettingsHandler::printSettings()
 {
 	std::map<std::string, bool>::iterator it_b;
 	std::map<std::string, double>::iterator it_d;
+	std::map<std::string, int>::iterator it_i;
 	std::map<std::string, std::string>::iterator it_s;
 
 	printf("Settings:\n");
@@ -29,6 +31,10 @@ void SettingsHandler::printSettings()
 	{
 		printf("   %s:%f\n", (*it_d).first.c_str(), (*it_d).second);
 	}
+	for (it_i = m_ints.begin(); it_i != m_ints.end(); ++it_i)
+	{
+		printf("   %s:%i\n", (*it_i).first.c_str(), (*it_i).second);
+	}
 	for (it_s = m_strings.begin(); it_s != m_strings.end(); ++it_s)
 	{
 		printf("   %s:%s\n", (*it_s).first.c_str(), (*it_s).second.c_str());
@@ -37,39 +43,6 @@ void SettingsHandler::printSettings()
 
 bool SettingsHandler::loadSettings(const char *path)
 {
-	/*FILE *pFile;
-	pFile = fopen(path, "r");
-
-	if (pFile == NULL)
-	{
-		printf("Failed to open settings file: %s\n", path);
-		return false;
-	}
-
-	char buffer[64];
-	memset(buffer, NULL, sizeof(buffer));
-
-	while (!feof(pFile))
-	{
-		fgets(buffer, sizeof(buffer), pFile);
-		int i = strspn(buffer, ":");
-
-		if (i != strlen(buffer))
-		{
-			char name[30];
-			char value[30];
-			strncpy(name, buffer, i);
-			strncpy(value, buffer + i, strlen(buffer));
-
-			puts(name);
-			printf("\n");
-			puts(value);
-			printf("\n");
-		}
-	}
-
-	fclose(pFile);*/
-
 	std::ifstream file(path, std::ios_base::in);
 
 	if (file.is_open())
@@ -101,11 +74,15 @@ bool SettingsHandler::loadSettings(const char *path)
 
 				set(name, flag);
 			}
+			else if (m_strings.count(name))
+			{
+				set(name, value);
+			}
 			else if (m_doubles.count(name))
 			{
 				if (value == "0")
 				{
-					set(name, 0);
+					set(name, (double)0);
 					continue;
 				}
 
@@ -114,6 +91,32 @@ bool SettingsHandler::loadSettings(const char *path)
 				try
 				{
 					v = std::stod(value, nullptr);
+				}
+				catch (const std::invalid_argument &ia)
+				{
+					printf("Invalid Argument: %s. %s:%s", ia.what(), name.c_str(), value.c_str());
+					continue;
+				}
+				catch (const std::out_of_range &oor)
+				{
+					printf("Out of range: %s. %s:%s", oor.what(), name.c_str(), value.c_str());
+					continue;
+				}
+				set(name, v);
+			}
+			else if (m_ints.count(name))
+			{
+				if (value == "0")
+				{
+					set(name, 0);
+					continue;
+				}
+
+				int v = 0;
+
+				try
+				{
+					v = std::stoi(value, nullptr);
 				}
 				catch (const std::invalid_argument &ia)
 				{
@@ -141,15 +144,16 @@ bool SettingsHandler::loadSettings(const char *path)
 
 void SettingsHandler::saveSettings(const char *path)
 {
-	if (m_bools.empty() && m_doubles.empty() && m_strings.empty()) return;
+	if (m_ints.empty() && m_bools.empty() && m_doubles.empty() && m_strings.empty()) return;
 
 	std::ofstream file(path, std::ios_base::out);
 
 	if (file.is_open())
 	{
-		std::map<std::string, bool>::iterator it_b;
-		std::map<std::string, double>::iterator it_d;
-		std::map<std::string, std::string>::iterator it_s;
+		std::map<std::string, bool>::iterator			it_b;
+		std::map<std::string, double>::iterator			it_d;
+		std::map<std::string, int>::iterator			it_i;
+		std::map<std::string, std::string>::iterator	it_s;
 
 		for (it_b = m_bools.begin(); it_b != m_bools.end(); ++it_b)
 		{
@@ -160,11 +164,18 @@ void SettingsHandler::saveSettings(const char *path)
 		}
 		for (it_d = m_doubles.begin(); it_d != m_doubles.end(); ++it_d)
 		{
-			char buffer[200];
-			sprintf_s(buffer, 200, "%s:%f\n", (*it_d).first.c_str(), (*it_d).second);
+			char buffer[64];
+			sprintf_s(buffer, 64, "%s:%f\n", (*it_d).first.c_str(), (*it_d).second);
 
 			file << buffer;
 
+		}
+		for (it_i = m_ints.begin(); it_i != m_ints.end(); ++it_i)
+		{
+			char buffer[64];
+			sprintf_s(buffer, 64, "%s:%i\n", (*it_i).first.c_str(), (*it_i).second);
+
+			file << buffer;
 		}
 		for (it_s = m_strings.begin(); it_s != m_strings.end(); ++it_s)
 		{
@@ -178,6 +189,16 @@ void SettingsHandler::saveSettings(const char *path)
 		printf("Could not create settings file.");
 	}
 
+}
+
+void axe::SettingsHandler::set(std::string name, double value)
+{
+	m_doubles[name] = value;
+}
+
+void axe::SettingsHandler::set(std::string name, int value)
+{
+	m_ints[name] = value;
 }
 
 void SettingsHandler::set(std::string name, bool value)
@@ -198,7 +219,7 @@ void SettingsHandler::get(std::string name, bool &ref)
 	}
 	else
 	{
-		printf("Setting %s does not exist.", name.c_str());
+		printf("Setting %s does not exist.\n", name.c_str());
 	}
 }
 void SettingsHandler::get(std::string name, std::string &ref)
@@ -209,6 +230,6 @@ void SettingsHandler::get(std::string name, std::string &ref)
 	}
 	else
 	{
-		printf("Setting %s does not exist.", name.c_str());
+		printf("Setting %s does not exist.\n", name.c_str());
 	}
 }

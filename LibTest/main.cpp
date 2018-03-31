@@ -9,8 +9,6 @@
 
 int main(int argc, char ** argv)
 {
-	al_init();
-
 	axe::InputHandler m_input;
 	axe::EventHandler m_events(60);
 	axe::DrawEngine m_draw;
@@ -18,6 +16,7 @@ int main(int argc, char ** argv)
 
 	int windowWidth = 1280;
 	int windowHeight = 768;
+	std::string windName = "axeLib v0.0.1 Test";
 
 	axe::SettingsHandler s;
 
@@ -25,17 +24,15 @@ int main(int argc, char ** argv)
 	s.set("height", windowHeight);
 
 	s.loadSettings(".settings");
-
+	
 	s.get("width", windowWidth);
 	s.get("height", windowHeight);
 
-	m_draw.createWindow(windowWidth, windowHeight, "axeLib v0.0.1 test");
+	m_draw.createWindow(windowWidth, windowHeight, windName);
 	m_draw.getWindow().registerForEvents(m_events.getEventQueue());
 
 	m_draw.fonts.setPathToResources("res/fonts/");
 	m_draw.bitmaps.setPathToResources("res/textures/");
-
-	bool redraw = true;
 
 	//m_states.changeState(std::unique_ptr<axe::AbstractState>(new SplashState(m_states, m_input, m_events, m_draw)));
 
@@ -56,16 +53,14 @@ int main(int argc, char ** argv)
 				//m_states.update();
 				m_draw.bitmaps.removeUnreferencedResources();
 				m_draw.fonts.removeUnreferencedResources();
-				redraw = true;
 			}
 		}
 
-		if (m_events.eventQueueEmpty() && redraw)
+		if (m_events.eventQueueEmpty())
 		{
 			//m_states.draw();
 
 			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
-			redraw = false;
 		}
 
 		m_states.cleanStates();

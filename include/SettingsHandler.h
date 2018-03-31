@@ -19,11 +19,8 @@ namespace axe
 		bool loadSettings(const char *path);
 		void saveSettings(const char *path);
 
-		template <typename t>
-		void set(std::string name, t value)
-		{
-			m_doubles[name] = static_cast<double>(value);
-		}
+		void set(std::string name, double value);
+		void set(std::string name, int value);
 		void set(std::string name, bool value);
 		void set(std::string name, std::string value);
 
@@ -33,6 +30,10 @@ namespace axe
 			if (m_doubles.count(name))
 			{
 				ref = static_cast<t>(m_doubles[name]);
+			}
+			else if (m_ints.count(name))
+			{
+				ref = static_cast<t>(m_ints[name]);
 			}
 			else
 			{
@@ -47,6 +48,7 @@ namespace axe
 	private:
 		std::map<std::string, bool> m_bools;
 		std::map<std::string, double> m_doubles;
+		std::map<std::string, int> m_ints;
 		std::map<std::string, std::string> m_strings;
 	};
 };

@@ -13,8 +13,8 @@
 #include "ResourceManager.h"
 #include "ResourceTypes.h"
 
-#include "Util\Logger.h"
-#include "Util\Timer.h" // For cursor blinking
+#include "util\Logger.h"
+#include "util\Timer.h" // For cursor blinking
 
 namespace axe
 {

@@ -1,6 +1,6 @@
 #include "InputHandler.h"
 
-#include "Util\Util.h"
+#include "util\Util.h"
 
 using namespace axe;
 
@@ -47,6 +47,7 @@ InputHandler::InputHandler()
 	, m_max_input_length(0)
 	, m_backspace_wait(BACKSPACE_WAIT_TIME)
 {
+	axe::allegro_init();
 	al_install_keyboard();
 	al_install_mouse();
 

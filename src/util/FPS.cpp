@@ -1,4 +1,4 @@
-#include "Util\FPS.h"
+#include "util\FPS.h"
 
 const int NUM_FRAMES_AVERAGE = 10;
 

@@ -1,9 +1,12 @@
 #include "Eventhandler.h"
+#include "util\Util.h"
 
 using namespace axe;
 
 EventHandler::EventHandler(int engine_speed) : focus(true), event_queue(nullptr), timer(nullptr)
 {
+	axe::allegro_init();
+
 	timer = al_create_timer(1.0f / float(engine_speed));
 
 	event_queue = al_create_event_queue();

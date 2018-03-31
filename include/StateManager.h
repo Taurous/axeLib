@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#include "Util\Logger.h"
+#include "util\Logger.h"
 
 #include "DrawEngine.h"
 #include "InputHandler.h"

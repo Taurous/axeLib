@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util\Logger.h"
+#include "util\Logger.h"
 #include <allegro5\allegro.h>
 #include <string>
 #include <vector>

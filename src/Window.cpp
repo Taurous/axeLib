@@ -45,7 +45,7 @@ namespace axe
 			m_display_modes.push_back(disp_mode);
 		}
 
-		printDisplayModes();
+		//printDisplayModes();
 
 		createWindow();
 	}

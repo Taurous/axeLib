@@ -14,12 +14,8 @@ axe::StateManager::~StateManager()
 
 void StateManager::changeState(std::unique_ptr<AbstractState> state)
 {
-	if (!m_states.empty()) {
-		m_dead_states.push_back(std::move(m_states.back()));
-		m_states.pop_back();
-	}
-
-	m_states.push_back(std::move(state));
+	popState();
+	pushState(std::move(state));
 }
 
 void StateManager::pushState(std::unique_ptr<AbstractState> state)
@@ -36,11 +32,7 @@ void StateManager::popState()
 	if (!m_states.empty()) {
 		m_dead_states.push_back(std::move(m_states.back()));
 		m_states.pop_back();
-		if (m_states.empty())
-		{
-			axe::log(axe::LOGGER_WARNING, "Trying to pop a state, no states exist.\n");
-		}
-		else m_states.back().get()->resume();
+		if (!m_states.empty()) m_states.back().get()->resume();
 	}
 }
 void StateManager::popState(int _FLAG, std::unique_ptr<AbstractState> state)
@@ -62,7 +54,7 @@ void StateManager::popState(int _FLAG, std::unique_ptr<AbstractState> state)
 			break;
 		default:
 			axe::log(LOGGER_ERROR, "Incorrect flag pass to popState()! Destroying state.\n");
-			// Need to make sure that "state" is destroyed when this function ends.
+			state.release();
 			break;
 		}
 	}

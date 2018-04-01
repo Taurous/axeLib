@@ -158,22 +158,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\AbstractState.h" />
-    <ClInclude Include="include\DrawEngine.h" />
-    <ClInclude Include="include\EventHandler.h" />
-    <ClInclude Include="include\InputHandler.h" />
-    <ClInclude Include="include\ResourceManager.h" />
-    <ClInclude Include="include\ResourceTypes.h" />
-    <ClInclude Include="include\SettingsHandler.h" />
-    <ClInclude Include="include\SoundManager.h" />
-    <ClInclude Include="include\StateManager.h" />
-    <ClInclude Include="include\util\FPS.h" />
-    <ClInclude Include="include\util\Logger.h" />
-    <ClInclude Include="include\util\Timer.h" />
-    <ClInclude Include="include\util\Util.h" />
-    <ClInclude Include="include\Window.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\Draw.cpp" />
     <ClCompile Include="src\DrawEngine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
@@ -184,6 +168,22 @@
     <ClCompile Include="src\StateManager.cpp" />
     <ClCompile Include="src\util\FPS.cpp" />
     <ClCompile Include="src\Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\axeLib\AbstractState.h" />
+    <ClInclude Include="include\axeLib\DrawEngine.h" />
+    <ClInclude Include="include\axeLib\EventHandler.h" />
+    <ClInclude Include="include\axeLib\InputHandler.h" />
+    <ClInclude Include="include\axeLib\ResourceManager.h" />
+    <ClInclude Include="include\axeLib\ResourceTypes.h" />
+    <ClInclude Include="include\axeLib\SettingsHandler.h" />
+    <ClInclude Include="include\axeLib\SoundManager.h" />
+    <ClInclude Include="include\axeLib\StateManager.h" />
+    <ClInclude Include="include\axeLib\util\FPS.h" />
+    <ClInclude Include="include\axeLib\util\Logger.h" />
+    <ClInclude Include="include\axeLib\util\Timer.h" />
+    <ClInclude Include="include\axeLib\util\Util.h" />
+    <ClInclude Include="include\axeLib\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

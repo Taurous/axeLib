@@ -1,13 +1,12 @@
 #include <allegro5\allegro.h>
 
-#include "InputHandler.h"
-#include "EventHandler.h"
-#include "Window.h"
-#include "DrawEngine.h"
-#include "StateManager.h"
-#include "SettingsHandler.h"
+#include <axeLib\InputHandler.h>
+#include <axeLib\EventHandler.h>
+#include <axeLib\DrawEngine.h>
+#include <axeLib\StateManager.h>
+#include <axeLib\SettingsHandler.h>
 
-#include "util\FPS.h"
+#include <axeLib\util\FPS.h>
 
 int main(int argc, char ** argv)
 {

@@ -1,4 +1,4 @@
-#include "ResourceTypes.h"
+#include "axeLib\ResourceTypes.h"
 #include <allegro5\allegro_primitives.h>
 
 namespace axe

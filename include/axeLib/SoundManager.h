@@ -22,7 +22,7 @@ namespace axe
 		float vol;
 	};*/
 
-	class SoundManager
+	class SoundManager // NYI
 	{
 	public:
 		SoundManager(void);

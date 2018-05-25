@@ -1,6 +1,6 @@
-#include "InputHandler.h"
+#include "axeLib\InputHandler.h"
 
-#include "util\Util.h"
+#include "axeLib\util\Util.h"
 
 using namespace axe;
 

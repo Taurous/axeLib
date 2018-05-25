@@ -17,7 +17,7 @@ DrawEngine::DrawEngine()
 
 	t_cursorFlash.start();
 
-	printf("DrawEngine Initialized\n");
+	log(LOGGER_MESSAGE, "DrawEngine Initialized\n");
 }
 
 DrawEngine::~DrawEngine()

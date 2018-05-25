@@ -11,8 +11,8 @@ EventHandler::EventHandler(int engine_speed) : focus(true), event_queue(nullptr)
 
 	event_queue = al_create_event_queue();
 
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
-	al_register_event_source(event_queue, al_get_mouse_event_source());
+	if (al_is_keyboard_installed()) al_register_event_source(event_queue, al_get_keyboard_event_source());
+	if (al_is_mouse_installed()) al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
 	al_init_user_event_source(&user_event_source);

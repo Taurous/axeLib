@@ -9,34 +9,49 @@
 
 #include "util\FPS.h"
 
+#include "SimpleState.h"
+
+const int DEFAULT_WIND_WIDTH = 1280;
+const int DEFAULT_WIND_HEIGHT = 720;
+
 int main(int argc, char ** argv)
 {
+	// First create an instance of each system that is needed.
+	// DrawEngine depends on EventHandler 
+
 	axe::InputHandler m_input;
 	axe::EventHandler m_events(60);
 	axe::DrawEngine m_draw;
 	axe::StateManager m_states;
 
-	int windowWidth = 1280;
-	int windowHeight = 768;
-	std::string windName = "axeLib v0.5.0 Test";
+	// Create SettingsHandler.
+	// Set some default settings, then load the settings and pass a reference into get(). get() returns false if the setting does not exist or cannot otherwise be retrieved.
 
 	axe::SettingsHandler s;
 
-	s.set("width", windowWidth);
-	s.set("height", windowHeight);
+	s.set("width", DEFAULT_WIND_WIDTH);
+	s.set("height", DEFAULT_WIND_HEIGHT);
 
 	s.loadSettings(".settings");
 	
-	s.get("width", windowWidth);
-	s.get("height", windowHeight);
+	int w, h;
+	s.get("width", w);
+	s.get("height", h);
 
-	m_draw.createWindow(windowWidth, windowHeight, windName);
+	// Create Window then register the window for events.
+
+	std::string windName = "axeLib v0.5.0 Test";
+	m_draw.createWindow(w, h, windName);
 	m_draw.getWindow().registerForEvents(m_events.getEventQueue());
+
+	//Set up paths to resources..
 
 	m_draw.fonts.setPathToResources("res/fonts/");
 	m_draw.bitmaps.setPathToResources("res/textures/");
 
-	//m_states.changeState(std::unique_ptr<axe::AbstractState>(new SplashState(m_states, m_input, m_events, m_draw)));
+	// Load up the inital state.
+
+	m_states.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_states, m_input, m_events, m_draw)));
 
 	axe::Timer clean_timer;
 	clean_timer.start();
@@ -49,7 +64,7 @@ int main(int argc, char ** argv)
 		if (m_events.handleEvents())
 		{
 			m_input.getInput(m_events.getEvent());
-			//m_states.handleEvents();
+			m_states.handleEvents();
 
 			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE))
 			{
@@ -57,13 +72,13 @@ int main(int argc, char ** argv)
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				//m_states.update();
+				m_states.update();
 			}
 		}
 
 		if (m_events.eventQueueEmpty())
 		{
-			//m_states.draw();
+			m_states.draw();
 
 			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
 			fpso.calculateAverageFps();
@@ -72,8 +87,6 @@ int main(int argc, char ** argv)
 		if (clean_timer.elapsed().count() / 1000 > 5)
 		{
 			clean_timer.restart();
-			m_draw.bitmaps.removeUnreferencedResources();
-			m_draw.fonts.removeUnreferencedResources();
 			m_states.cleanStates();
 		}
 	}

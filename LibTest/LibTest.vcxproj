@@ -160,6 +160,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SimpleState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SimpleState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -88,6 +88,7 @@ void InputHandler::getInput(const ALLEGRO_EVENT &ev)
 			setBit(m_mod_flags, MOD_SHIFT, true);
 			setBit(m_mod_flags, MOD_NONE, false);
 			break;
+		case ALLEGRO_KEY_ALTGR:
 		case ALLEGRO_KEY_ALT:
 			setBit(m_mod_flags, MOD_ALT, true);
 			setBit(m_mod_flags, MOD_NONE, false);
@@ -125,6 +126,7 @@ void InputHandler::getInput(const ALLEGRO_EVENT &ev)
 		case ALLEGRO_KEY_RSHIFT:
 			setBit(m_mod_flags, MOD_SHIFT, false);
 			break;
+		case ALLEGRO_KEY_ALTGR:
 		case ALLEGRO_KEY_ALT:
 			setBit(m_mod_flags, MOD_ALT, false);
 			break;

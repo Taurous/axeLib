@@ -25,7 +25,7 @@ namespace axe
 		void set(std::string name, std::string value);
 
 		template <typename t>
-		void get(std::string name, t &ref)
+		bool get(std::string name, t &ref)
 		{
 			if (m_doubles.count(name))
 			{
@@ -38,10 +38,13 @@ namespace axe
 			else
 			{
 				printf("Setting %s does not exist.", name.c_str());
+				return false;
 			}
+
+			return true;
 		}
-		void get(std::string name, bool &ref);
-		void get(std::string name, std::string &ref);
+		bool get(std::string name, bool &ref);
+		bool get(std::string name, std::string &ref);
 
 		void printSettings();
 

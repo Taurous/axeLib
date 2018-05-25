@@ -211,7 +211,7 @@ void SettingsHandler::set(std::string name, std::string value)
 	m_strings[name] = value;
 }
 
-void SettingsHandler::get(std::string name, bool &ref)
+bool SettingsHandler::get(std::string name, bool &ref)
 {
 	if (m_bools.count(name))
 	{
@@ -220,9 +220,12 @@ void SettingsHandler::get(std::string name, bool &ref)
 	else
 	{
 		printf("Setting %s does not exist.\n", name.c_str());
+		return false;
 	}
+
+	return true;
 }
-void SettingsHandler::get(std::string name, std::string &ref)
+bool SettingsHandler::get(std::string name, std::string &ref)
 {
 	if (m_strings.count(name))
 	{
@@ -231,5 +234,8 @@ void SettingsHandler::get(std::string name, std::string &ref)
 	else
 	{
 		printf("Setting %s does not exist.\n", name.c_str());
+		return false;
 	}
+
+	return true;
 }

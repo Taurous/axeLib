@@ -100,7 +100,6 @@ namespace axe
 
 		ResourceHandle<T> getResource(const std::string &name);
 		T* operator[](const ResourceHandle<T> &handle);
-		void removeUnreferencedResources();
 
 	protected:
 
@@ -183,7 +182,8 @@ namespace axe
 		return m_resources[EMPTY_RESOURCE_];
 	}
 
-	template <typename T>
+	// Removed due to no need for this fuction in a low resource game.
+	/*template <typename T>
 	void ResourceManager<T>::removeUnreferencedResources()
 	{
 		for (unsigned int i = 1; i < m_resources.size(); ++i)
@@ -195,5 +195,5 @@ namespace axe
 				m_resources[i]->setID(EMPTY_RESOURCE_);
 			}
 		}
-	}
+	}*/
 };

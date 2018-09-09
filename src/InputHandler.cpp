@@ -204,17 +204,39 @@ void InputHandler::handleTextInput(const ALLEGRO_EVENT &ev)
 		{
 			switch (c)
 			{
+			case ALLEGRO_KEY_COMMA:
+				if (m_allow_specials) shift ? stringPushBack('<') : stringPushBack(',');
+				break;
 			case ALLEGRO_KEY_FULLSTOP:
-				if (m_allow_specials) stringPushBack('.');
+				if (m_allow_specials) shift ? stringPushBack('>') : stringPushBack('.');
+				break;
+			case ALLEGRO_KEY_SEMICOLON:
+				if (m_allow_specials) shift ? stringPushBack(':') : stringPushBack(';');
+				break;
+			case ALLEGRO_KEY_QUOTE:
+				if (m_allow_specials) shift ? stringPushBack('"') : stringPushBack('\'');
+				break;
+			case ALLEGRO_KEY_OPENBRACE:
+				if (m_allow_specials) shift ? stringPushBack('{') : stringPushBack('[');
+				break;
+			case ALLEGRO_KEY_CLOSEBRACE:
+				if (m_allow_specials) shift ? stringPushBack('}') : stringPushBack(']');
+				break;
+			case ALLEGRO_KEY_SLASH:
+				if (m_allow_specials) shift ? stringPushBack('?') : stringPushBack('/');
+				break;
+			case ALLEGRO_KEY_TILDE:
+				if (m_allow_specials) shift ? stringPushBack('`') : stringPushBack('~');
+				break;
+
+			case ALLEGRO_KEY_TAB:
+				if (m_allow_space) stringPushBack('\t');
 				break;
 			case ALLEGRO_KEY_SPACE:
 				if (m_allow_space) stringPushBack(' ');
 				break;
 			case ALLEGRO_KEY_ENTER:
 				if (m_allow_newline) stringPushBack('\n');
-				break;
-			case ALLEGRO_KEY_COMMA:
-				if (m_allow_specials) stringPushBack(',');
 				break;
 			default:
 				break;

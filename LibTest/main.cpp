@@ -3,95 +3,65 @@
 #include <axeLib\InputHandler.h>
 #include <axeLib\EventHandler.h>
 #include <axeLib\DrawEngine.h>
-#include <axeLib\StateManager.h>
-#include <axeLib\SettingsHandler.h>
 
-#include <axeLib\util\FPS.h>
-
-#include "SimpleState.h"
+#include <axeLib/SimpleObject.h>
 
 const int DEFAULT_WIND_WIDTH = 1280;
 const int DEFAULT_WIND_HEIGHT = 720;
 
 int main(int argc, char ** argv)
 {
-	// First create an instance of each system that is needed.
 	// DrawEngine depends on EventHandler 
 
 	axe::InputHandler m_input;
 	axe::EventHandler m_events(60);
 	axe::DrawEngine m_draw;
-	axe::StateManager m_states;
 
-	// Create SettingsHandler.
-	// Set some default settings, then load the settings and pass a reference into get(). get() returns false if the setting does not exist or cannot otherwise be retrieved.
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, "axeLib v0.5.0 Test").registerForEvents(m_events.getEventQueue());
 
-	axe::SettingsHandler s;
+	axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
+		m_draw.getWindow().getScreenWidth(),
+		m_draw.getWindow().getScreenHeight()
+	);
 
-	s.set("width", DEFAULT_WIND_WIDTH);
-	s.set("height", DEFAULT_WIND_HEIGHT);
+	axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
+		m_draw.getWindow().getWindowWidth(),
+		m_draw.getWindow().getWindowHeight()
+	);
 
-	s.loadSettings(".settings");
-	
-	int w, h;
-	s.get("width", w);
-	s.get("height", h);
+	SimpleObject obj("simple.png");
 
-	// Create Window then register the window for events.
+	DrawObjectRef objRef(obj); // replace with call to something like m_draw->register(obj, layer);
 
-	std::string windName = "axeLib v0.5.0 Test";
-	m_draw.createWindow(w, h, windName);
-	m_draw.getWindow().registerForEvents(m_events.getEventQueue());
+	obj.setWorldX(DEFAULT_WIND_WIDTH / 2);
+	obj.setWorldY(DEFAULT_WIND_HEIGHT / 2);
 
-	//Set up paths to resources..
-
-	m_draw.fonts.setPathToResources("res/fonts/");
-	m_draw.bitmaps.setPathToResources("res/textures/");
-
-	// Load up the inital state.
-
-	m_states.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_states, m_input, m_events, m_draw)));
-
-	axe::Timer clean_timer;
-	clean_timer.start();
-
-	axe::FPSObject fpso;
+	bool running = true;
 
 	m_events.startTimer();
-	while (m_states.running())
+	while (running)
 	{
 		if (m_events.handleEvents())
 		{
 			m_input.getInput(m_events.getEvent());
-			m_states.handleEvents();
 
-			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE))
+			obj.handleEvents(m_input);
+
+			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE) || m_input.isKeyPressed(ALLEGRO_KEY_ESCAPE))
 			{
-				m_states.quit();
+				running = false;
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				m_states.update();
+				//tick
 			}
 		}
 
 		if (m_events.eventQueueEmpty())
 		{
-			m_states.draw();
+			objRef.draw(); // replace with something like m_draw->drawObjects();
 
 			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
-			fpso.calculateAverageFps();
-		}
-
-		if (clean_timer.elapsed().count() / 1000 > 5)
-		{
-			clean_timer.restart();
-			m_states.cleanStates();
 		}
 	}
-
-	s.set("width", m_draw.getWindowWidth());
-	s.set("height", m_draw.getWindowHeight());
-
-	s.saveSettings(".settings");
 }

@@ -3,80 +3,81 @@
 #include <axeLib\InputHandler.h>
 #include <axeLib\EventHandler.h>
 #include <axeLib\DrawEngine.h>
-#include <axeLib\StateManager.h>
-#include <axeLib\util\FPS.h>
 
-#include "SimpleState.h"
+#include <axeLib\simpleObject.h>
 
 const int DEFAULT_WIND_WIDTH = 1280;
 const int DEFAULT_WIND_HEIGHT = 720;
 
+void printResolution(axe::DrawEngine &draw)
+{
+	axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
+		draw.getWindow().getScreenWidth(),
+		draw.getWindow().getScreenHeight()
+	);
+
+	axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
+		draw.getWindow().getWindowWidth(),
+		draw.getWindow().getWindowHeight()
+	);
+}
+
 int main(int argc, char ** argv)
 {
-	// First create an instance of each system that is needed.
 	// DrawEngine depends on EventHandler 
 
+	axe::Timer t;
+
+	const double ticksPerSecond = 60.f;
+
 	axe::InputHandler m_input;
-	axe::EventHandler m_events(60);
+	axe::EventHandler m_events(ticksPerSecond);
 	axe::DrawEngine m_draw;
-	axe::StateManager m_states;
 
-	// SettingsHandler replaced by nlohmann::json.
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, "axeLib v0.5.0 Test").registerForEvents(m_events.getEventQueue());
 
-	int w, h;
-	w = 640;
-	h = 480;
+	printResolution(m_draw);
 
-	// Create Window then register the window for events.
+	SimpleObject obj(DEFAULT_WIND_WIDTH * 0.25, DEFAULT_WIND_HEIGHT / 2.f);
 
-	std::string windName = "axeLib v0.5.0 Test";
-	m_draw.createWindow(w, h, windName);
-	m_draw.getWindow().registerForEvents(m_events.getEventQueue());
+	DrawObjectRef objRef(obj, "simple.png"); // replace with call to something like m_draw->register(obj, layer);
 
-	//Set up paths to resources..
+	bool running = true;
+	bool redraw = false;
 
-	m_draw.fonts.setPathToResources("res/fonts/");
-	m_draw.bitmaps.setPathToResources("res/textures/");
+	m_draw.flipAndClear(al_map_rgb(0, 0, 0));
 
-	// Load up the inital state.
-
-	m_states.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_states, m_input, m_events, m_draw)));
-
-	axe::Timer clean_timer;
-	clean_timer.start();
-
-	axe::FPSObject fpso;
-
+	t.start();
 	m_events.startTimer();
-	while (m_states.running())
+	while (running)
 	{
 		if (m_events.handleEvents())
 		{
 			m_input.getInput(m_events.getEvent());
-			m_states.handleEvents();
 
-			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE))
+			obj.handleEvents(m_input);
+
+			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE) || m_input.isKeyPressed(ALLEGRO_KEY_ESCAPE))
 			{
-				m_states.quit();
+				running = false;
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				m_states.update();
+				redraw = true;
+				double delta = t.restart().count() / 1000.f;
+
+				obj.update(delta);
 			}
 		}
 
-		if (m_events.eventQueueEmpty())
+		if (m_events.eventQueueEmpty() && redraw)
 		{
-			m_states.draw();
+			redraw = false;
 
-			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
-			fpso.calculateAverageFps();
-		}
+			objRef.draw(0, 0);
 
-		if (clean_timer.elapsed().count() / 1000 > 5)
-		{
-			clean_timer.restart();
-			m_states.cleanStates();
+			//m_draw.flipAndClear(al_map_rgb(0, 0, 0));
+			al_flip_display();
 		}
 	}
 }

@@ -6,23 +6,35 @@
 class DrawObjectRef
 {
 public:
-	DrawObjectRef(DrawObject &ref) : m_ref(&ref), bmp(nullptr)
+	DrawObjectRef(GameObject &ref, std::string image_name) : m_ref(&ref), m_bmp(nullptr), m_bitmap_width(1), m_bitmap_height(1)
 	{
-		bmp = al_load_bitmap(m_ref->getImageName().c_str());
+		m_bmp = al_load_bitmap(image_name.c_str());
+
+		if (m_bmp)
+		{
+			m_bitmap_width = al_get_bitmap_width(m_bmp);
+			m_bitmap_height = al_get_bitmap_height(m_bmp);
+		}
 	}
-	~DrawObjectRef()
+	virtual	~DrawObjectRef()
 	{
-		if (bmp) al_destroy_bitmap(bmp);
-		bmp = nullptr;
+		if (m_bmp) al_destroy_bitmap(m_bmp);
+		m_bmp = nullptr;
 	}
 
-	void draw()
+	virtual void draw(int xOff, int yOff)
 	{
-		if (bmp) al_draw_bitmap(bmp, m_ref->getWorldX(), m_ref->getWorldY(), 0);
+		float cur_x = m_ref->getWorldX();
+		float cur_y = m_ref->getWorldY();
+
+		//if (m_bmp) al_draw_bitmap(m_bmp, cur_x - m_bitmap_width / 2, cur_y - m_bitmap_width / 2, 0);
+		al_draw_filled_circle(cur_x+xOff, cur_y+yOff, 2, al_map_rgb(255, 0, 255));
 	}
 
 private:
-	DrawObject *m_ref;
+	GameObject *m_ref;
+	ALLEGRO_BITMAP *m_bmp;
 
-	ALLEGRO_BITMAP *bmp;
+	int m_bitmap_width;
+	int m_bitmap_height;
 };

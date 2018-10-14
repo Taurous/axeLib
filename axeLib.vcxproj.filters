@@ -22,6 +22,12 @@
     <Filter Include="Header Files\Utility">
       <UniqueIdentifier>{8ff135a9-5c1e-4089-b045-109c41e43475}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Objects">
+      <UniqueIdentifier>{8cf0b068-6d2b-4bae-8754-520cb1408a9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Objects">
+      <UniqueIdentifier>{0a7fcc58-3a95-4798-ab32-ad362c35501c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -49,7 +55,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SimpleObject.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,14 +89,14 @@
     <ClInclude Include="include\axeLib\Window.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="include\axeLib\GameObject.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\axeLib\SimpleObject.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="include\axeLib\DrawObjectRef.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="include\axeLib\SimpleObject.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\axeLib\GameObject.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

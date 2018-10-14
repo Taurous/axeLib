@@ -4,40 +4,50 @@
 #include <axeLib\EventHandler.h>
 #include <axeLib\DrawEngine.h>
 
-#include <axeLib/SimpleObject.h>
+#include <axeLib\simpleObject.h>
 
 const int DEFAULT_WIND_WIDTH = 1280;
 const int DEFAULT_WIND_HEIGHT = 720;
+
+void printResolution(axe::DrawEngine &draw)
+{
+	axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
+		draw.getWindow().getScreenWidth(),
+		draw.getWindow().getScreenHeight()
+	);
+
+	axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
+		draw.getWindow().getWindowWidth(),
+		draw.getWindow().getWindowHeight()
+	);
+}
 
 int main(int argc, char ** argv)
 {
 	// DrawEngine depends on EventHandler 
 
+	axe::Timer t;
+
+	const double ticksPerSecond = 60.f;
+
 	axe::InputHandler m_input;
-	axe::EventHandler m_events(60);
+	axe::EventHandler m_events(ticksPerSecond);
 	axe::DrawEngine m_draw;
 
 	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, "axeLib v0.5.0 Test").registerForEvents(m_events.getEventQueue());
 
-	axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
-		m_draw.getWindow().getScreenWidth(),
-		m_draw.getWindow().getScreenHeight()
-	);
+	printResolution(m_draw);
 
-	axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
-		m_draw.getWindow().getWindowWidth(),
-		m_draw.getWindow().getWindowHeight()
-	);
+	SimpleObject obj(DEFAULT_WIND_WIDTH * 0.25, DEFAULT_WIND_HEIGHT / 2.f);
 
-	SimpleObject obj("simple.png");
-
-	DrawObjectRef objRef(obj); // replace with call to something like m_draw->register(obj, layer);
-
-	obj.setWorldX(DEFAULT_WIND_WIDTH / 2);
-	obj.setWorldY(DEFAULT_WIND_HEIGHT / 2);
+	DrawObjectRef objRef(obj, "simple.png"); // replace with call to something like m_draw->register(obj, layer);
 
 	bool running = true;
+	bool redraw = false;
 
+	m_draw.flipAndClear(al_map_rgb(0, 0, 0));
+
+	t.start();
 	m_events.startTimer();
 	while (running)
 	{
@@ -53,15 +63,21 @@ int main(int argc, char ** argv)
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				//tick
+				redraw = true;
+				double delta = t.restart().count() / 1000.f;
+
+				obj.update(delta);
 			}
 		}
 
-		if (m_events.eventQueueEmpty())
+		if (m_events.eventQueueEmpty() && redraw)
 		{
-			objRef.draw(); // replace with something like m_draw->drawObjects();
+			redraw = false;
 
-			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
+			objRef.draw(0, 0);
+
+			//m_draw.flipAndClear(al_map_rgb(0, 0, 0));
+			al_flip_display();
 		}
 	}
 }

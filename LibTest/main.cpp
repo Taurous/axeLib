@@ -4,79 +4,75 @@
 #include <axeLib\EventHandler.h>
 #include <axeLib\DrawEngine.h>
 #include <axeLib\StateManager.h>
-#include <axeLib\util\FPS.h>
 
 #include "SimpleState.h"
 
-const int DEFAULT_WIND_WIDTH = 1280;
-const int DEFAULT_WIND_HEIGHT = 720;
+#include <vector>
+
+const int DEFAULT_WIND_WIDTH = 800;
+const int DEFAULT_WIND_HEIGHT = 600;
+
+void printResolution(axe::DrawEngine &draw)
+{
+	axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
+		draw.getWindow().getScreenWidth(),
+		draw.getWindow().getScreenHeight()
+	);
+
+	axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
+		draw.getWindow().getWindowWidth(),
+		draw.getWindow().getWindowHeight()
+	);
+}
 
 int main(int argc, char ** argv)
 {
-	// First create an instance of each system that is needed.
 	// DrawEngine depends on EventHandler 
 
+	const double ticksPerSecond = 60.f;
+
 	axe::InputHandler m_input;
-	axe::EventHandler m_events(60);
+	axe::EventHandler m_events(ticksPerSecond);
 	axe::DrawEngine m_draw;
-	axe::StateManager m_states;
+	axe::StateManager m_state;
 
-	// SettingsHandler replaced by nlohmann::json.
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, "axeLib Test").registerForEvents(m_events.getEventQueue());
 
-	int w, h;
-	w = 640;
-	h = 480;
+	printResolution(m_draw);
 
-	// Create Window then register the window for events.
+	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
 
-	std::string windName = "axeLib v0.5.0 Test";
-	m_draw.createWindow(w, h, windName);
-	m_draw.getWindow().registerForEvents(m_events.getEventQueue());
-
-	//Set up paths to resources..
-
-	m_draw.fonts.setPathToResources("res/fonts/");
-	m_draw.bitmaps.setPathToResources("res/textures/");
-
-	// Load up the inital state.
-
-	m_states.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_states, m_input, m_events, m_draw)));
-
-	axe::Timer clean_timer;
-	clean_timer.start();
-
-	axe::FPSObject fpso;
+	bool redraw = false;
 
 	m_events.startTimer();
-	while (m_states.running())
+	while (m_state.running())
 	{
 		if (m_events.handleEvents())
 		{
 			m_input.getInput(m_events.getEvent());
-			m_states.handleEvents();
 
-			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE))
+			m_state.handleEvents();
+
+			if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_CLOSE) || m_input.isKeyPressed(ALLEGRO_KEY_ESCAPE))
 			{
-				m_states.quit();
+				m_state.quit();
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				m_states.update();
+				m_state.update();
+				redraw = true;
 			}
 		}
 
-		if (m_events.eventQueueEmpty())
+		if (m_events.eventQueueEmpty() && redraw)
 		{
-			m_states.draw();
+			redraw = false;
+
+			m_state.draw();
 
 			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
-			fpso.calculateAverageFps();
 		}
 
-		if (clean_timer.elapsed().count() / 1000 > 5)
-		{
-			clean_timer.restart();
-			m_states.cleanStates();
-		}
+		m_state.cleanStates();
 	}
 }

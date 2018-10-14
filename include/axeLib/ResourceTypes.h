@@ -63,7 +63,7 @@ namespace axe
 	class Bitmap : public ResourceBase
 	{
 	public:
-		Bitmap(short id, const std::string& path, const std::string& name) : m_data(nullptr), ResourceBase(id, path, name) { }
+		Bitmap(short id, const std::string& path, const std::string& name) : m_data(nullptr), ResourceBase(id, path, name), m_width(1), m_height(1) { }
 		~Bitmap();
 
 		virtual bool load();

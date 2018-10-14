@@ -9,13 +9,6 @@ DrawEngine::DrawEngine()
 
 	al_init_image_addon();
 	al_init_primitives_addon();
-	al_init_font_addon();
-	al_init_ttf_addon();
-
-	bitmaps.setPathToResources("resources/textures/");	// Default Path
-	fonts.setPathToResources("resources/fonts/");		// Default Path
-
-	t_cursorFlash.start();
 
 	log(LOGGER_MESSAGE, "DrawEngine Initialized\n");
 }
@@ -25,14 +18,12 @@ DrawEngine::~DrawEngine()
 	
 }
 
-void DrawEngine::createWindow(int width, int height, std::string title, std::string icon_path, int flags)
+Window &DrawEngine::createWindow(int width, int height, std::string title, std::string icon_path, int flags)
 {
-	m_window.create(width, height, title, icon_path, flags);
+	return m_window.create(width, height, title, icon_path, flags);
 }
-void axe::DrawEngine::handleEvents(const ALLEGRO_EVENT &ev)
-{
 
-}
+/*
 
 int DrawEngine::formatStringByWidth(const ResourceHandle<Font> &font, int max_string_width, std::string &str)
 {
@@ -72,3 +63,5 @@ int DrawEngine::formatStringByWidth(const ResourceHandle<Font> &font, int max_st
 
 	return rows;
 }
+
+*/

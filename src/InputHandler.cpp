@@ -63,6 +63,8 @@ InputHandler::~InputHandler()
 {
 	al_uninstall_keyboard();
 	al_uninstall_mouse();
+
+	axe::log(LOGGER_MESSAGE, "InputHandler destroyed\n");
 }
 
 void InputHandler::stringPushBack(char c)

@@ -4,8 +4,6 @@
 #include <axeLib\EventHandler.h>
 #include <axeLib\DrawEngine.h>
 #include <axeLib\StateManager.h>
-#include <axeLib\SettingsHandler.h>
-
 #include <axeLib\util\FPS.h>
 
 #include "SimpleState.h"
@@ -23,19 +21,11 @@ int main(int argc, char ** argv)
 	axe::DrawEngine m_draw;
 	axe::StateManager m_states;
 
-	// Create SettingsHandler.
-	// Set some default settings, then load the settings and pass a reference into get(). get() returns false if the setting does not exist or cannot otherwise be retrieved.
+	// SettingsHandler replaced by nlohmann::json.
 
-	axe::SettingsHandler s;
-
-	s.set("width", DEFAULT_WIND_WIDTH);
-	s.set("height", DEFAULT_WIND_HEIGHT);
-
-	s.loadSettings(".settings");
-	
 	int w, h;
-	s.get("width", w);
-	s.get("height", h);
+	w = 640;
+	h = 480;
 
 	// Create Window then register the window for events.
 
@@ -89,9 +79,4 @@ int main(int argc, char ** argv)
 			m_states.cleanStates();
 		}
 	}
-
-	s.set("width", m_draw.getWindowWidth());
-	s.set("height", m_draw.getWindowHeight());
-
-	s.saveSettings(".settings");
 }

@@ -163,7 +163,6 @@
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\InputHandler.cpp" />
     <ClCompile Include="src\ResourceTypes.cpp" />
-    <ClCompile Include="src\SettingsHandler.cpp" />
     <ClCompile Include="src\SoundManager.cpp" />
     <ClCompile Include="src\StateManager.cpp" />
     <ClCompile Include="src\util\FPS.cpp" />
@@ -176,7 +175,6 @@
     <ClInclude Include="include\axeLib\InputHandler.h" />
     <ClInclude Include="include\axeLib\ResourceManager.h" />
     <ClInclude Include="include\axeLib\ResourceTypes.h" />
-    <ClInclude Include="include\axeLib\SettingsHandler.h" />
     <ClInclude Include="include\axeLib\SoundManager.h" />
     <ClInclude Include="include\axeLib\StateManager.h" />
     <ClInclude Include="include\axeLib\util\FPS.h" />

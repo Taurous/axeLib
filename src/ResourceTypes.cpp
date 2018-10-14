@@ -201,8 +201,8 @@ namespace axe
 
 	void Font::createDefault(void)
 	{
-		// Need to fix
-
+		m_name = "ariblk.ttf";
+		m_path = "C:\\Windows\\Fonts\\Arial\\";
 		m_loaded = false;
 	}
 

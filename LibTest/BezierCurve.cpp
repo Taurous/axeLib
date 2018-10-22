@@ -19,6 +19,12 @@ void BezierCurve::addPoint(float x, float y)
 }
 void BezierCurve::addPoint(vec2d_f v)
 {
+	if (control_points.size() > 20)
+	{
+		printf("Control Point limit reached.\n");
+		return;
+	}
+
 	control_points.push_back(v);
 	if (control_points.size() > 1) calculate();
 }
@@ -33,14 +39,16 @@ void BezierCurve::calculate()
 {
 	curve_points.clear();
 
+	int max_recursion = 0;
+
 	for (int i = 0; i <= SUBDIVS+1; ++i)
 	{
-		printf("Subdiv level: %.6f\n", float(i) / (SUBDIVS+1));
 		curve_points.push_back(getMidpoints(control_points, float(i) / (SUBDIVS+1)).front());
-		printf("Point calculated: %.2f, %.2f\n", curve_points.back().x, curve_points.back().y);
+		if (recursion_count > max_recursion) max_recursion = recursion_count;
 		recursion_count = 0;
 	}
 
+	printf("Control Points: %i, Recursion: %i\n", control_points.size(), max_recursion);
 	printf("Calculated!\n");
 
 }
@@ -49,7 +57,7 @@ std::vector<vec2d_f> BezierCurve::getMidpoints(std::vector<vec2d_f> vec, float d
 {
 	//if (recursion_count > 50) return std::vector<vec2d_f>();
 
-	//recursion_count++;
+	++recursion_count;
 
 	std::vector<vec2d_f> temp_points;
 

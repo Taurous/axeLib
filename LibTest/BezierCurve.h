@@ -4,7 +4,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <vector>
 
-const int SUBDIVS = 19;
+const int SUBDIVS = 99;
 
 struct vec2d_f
 {

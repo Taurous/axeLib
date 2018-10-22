@@ -20,7 +20,7 @@ namespace axe
 
 		~Window();
 
-		void create(int width, int height, std::string title, std::string icon_path = "", int flags = ALLEGRO_WINDOWED);
+		Window &create(int width, int height, std::string title, std::string icon_path = "", int flags = ALLEGRO_WINDOWED);
 
 		void setWindowIcon(std::string path);
 		void setWindowTitle(std::string title);

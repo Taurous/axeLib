@@ -25,7 +25,7 @@ namespace axe
 		m_display = nullptr;
 	}
 
-	void Window::create(int width, int height, std::string title, std::string icon_path, int flags)
+	Window &Window::create(int width, int height, std::string title, std::string icon_path, int flags)
 	{
 		m_width = width;
 		m_height = height;
@@ -48,6 +48,8 @@ namespace axe
 		//printDisplayModes();
 
 		createWindow();
+
+		return *this;
 	}
 
 	void Window::printDisplayModes()

@@ -19,7 +19,6 @@
 What the hell did I mean by this?
 */
 
-
 namespace axe
 {
 	enum

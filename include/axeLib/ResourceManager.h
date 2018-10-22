@@ -9,76 +9,26 @@
 #include <functional>
 
 #include "ResourceTypes.h"
+#include "ResourceHandle.h"
 
 namespace axe
 {
-	const int EMPTY_RESOURCE_ = 0;
-
-	template <typename T>
-	struct ResourceHandle
-	{
-		static_assert(std::is_base_of<ResourceBase, T>::value, "Type must be derived from ResourceBase!");
-		ResourceHandle() : resource(nullptr) { }
-
-		ResourceHandle(T *r) : resource(r)
-		{
-			resource->incRef();
-		}
-		ResourceHandle(const ResourceHandle &r)
-		{
-			resource = r.resource;
-			resource->incRef();
-		}
-		ResourceHandle &operator=(const ResourceHandle &r)
-		{
-			resource = r.resource;
-			resource->incRef();
-			return *this;
-		}
-
-		~ResourceHandle()
-		{
-			resource->decRef();
-		}
-
-		bool isNull() { return (resource == nullptr); }
-		bool isEmpty() { return (resource->getID() == EMPTY_RESOURCE_); }
-		bool isLoaded() { return resource->isLoaded(); }
-
-		bool operator==(const ResourceHandle& other) const { return (other.resource->getID() == this->resource->getID()); }
-		bool operator!=(const ResourceHandle& other) const { return !(*this == other); }
-
-		operator int() const { return this->resource->getID(); }
-		operator bool() const
-		{
-			if (resource == nullptr) return false;
-
-			return this->resource->getID() != EMPTY_RESOURCE_;
-		}
-
-		bool operator==(const int other) const { return (other == this->resource->getID()); }
-		bool operator!=(const int other) const { return (other != this->resource->getID()); }
-		bool operator>=(const int other) const { return (*this > other || *this == other); }
-		bool operator<=(const int other) const { return (*this < other || *this == other); }
-		bool operator<(const int other) const { return (this->resource->getID() < other); }
-		bool operator>(const int other) const { return (this->resource->getID() > other); }
-
-	private:
-		T *resource;
-	};
-
 	template <typename T>
 	class ResourceManager
 	{
 		static_assert(std::is_base_of<ResourceBase, T>::value, "Type must be derived from ResourceBase!");
+
+		template <typename T>
+		friend class ResourceHandle;
+
 	public:
 		ResourceManager() : m_path_to_resources("/") { }
 		ResourceManager(std::string path_to_resources) : m_path_to_resources(path_to_resources) { }
 
-		ResourceManager(const ResourceManager&) = delete;
-		ResourceManager(ResourceManager&&) = delete;
-		ResourceManager& operator=(const ResourceManager&) & = delete;
-		ResourceManager& operator=(ResourceManager&&) & = delete;
+		ResourceManager(const ResourceManager&)					= delete;
+		ResourceManager(ResourceManager&&)						= delete;
+		ResourceManager& operator=(const ResourceManager&) &	= delete;
+		ResourceManager& operator=(ResourceManager&&) &			= delete;
 
 		~ResourceManager()
 		{
@@ -98,20 +48,26 @@ namespace axe
 
 		void setPathToResources(std::string path) { m_path_to_resources = path; }
 
-		ResourceHandle<T> getResource(const std::string &name);
+		ResourceHandle<T> getResourceHandle(const std::string &name);
 		T* operator[](const ResourceHandle<T> &handle);
 
 	protected:
+		void decRef(int id);x
+		void incRef(int id);
 
 		std::stack<int> m_unused_handles;
-		std::vector<T*> m_resources;
+		std::vector<std::unique_ptr<T>> m_resources;
 
 		std::string m_path_to_resources;
 	};
 
-	// Resource Manager member function definitions
 
-	template <typename T> ResourceHandle<T> ResourceManager<T>::getResource(const std::string &name)
+
+////				Resource Manager member function definitions				////
+
+
+
+	template <typename T> ResourceHandle<T> ResourceManager<T>::getResourceHandle(const std::string &name)
 	{
 		if (m_resources.size() == 0) // Create default resource
 		{

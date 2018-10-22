@@ -1,7 +1,12 @@
 #include "axeLib\DrawEngine.h"
 
+
+
 namespace axe
 {
+
+/*
+
 	typedef std::vector<std::string>::iterator it;
 
 	void axe::DrawEngine::drawText(ResourceHandle<Font> font, ALLEGRO_COLOR cl, float x, float y, int flags, std::string text)
@@ -158,6 +163,8 @@ namespace axe
 	{
 		al_draw_tinted_bitmap(bitmaps[bmp]->getData(), cl, x, y, flags);
 	}
+
+*/
 
 	void DrawEngine::flipAndClear(ALLEGRO_COLOR cl)
 	{

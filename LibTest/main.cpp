@@ -9,8 +9,8 @@
 
 #include <vector>
 
-const int DEFAULT_WIND_WIDTH = 800;
-const int DEFAULT_WIND_HEIGHT = 600;
+const int DEFAULT_WIND_WIDTH = 1920;
+const int DEFAULT_WIND_HEIGHT = 1080;
 
 void printResolution(axe::DrawEngine &draw)
 {
@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
 	axe::DrawEngine m_draw;
 	axe::StateManager m_state;
 
-	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, "axeLib Test").registerForEvents(m_events.getEventQueue());
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, "axeLib Test", "", ALLEGRO_FULLSCREEN_WINDOW).registerForEvents(m_events.getEventQueue());
 
 	printResolution(m_draw);
 

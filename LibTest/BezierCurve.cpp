@@ -31,6 +31,7 @@ void BezierCurve::addPoint(vec2d_f v)
 
 void BezierCurve::clearPoints()
 {
+	arrows.clear();
 	control_points.clear();
 	curve_points.clear();
 }
@@ -48,7 +49,43 @@ void BezierCurve::calculate()
 		recursion_count = 0;
 	}
 
-	printf("Control Points: %i, Recursion: %i\n", control_points.size(), max_recursion);
+	arrow ar;
+
+	auto prev = control_points.rbegin();
+	auto back = prev++;
+	
+	// Get control point x,y
+	ar.x1 = (*prev).x;
+	ar.y1 = (*prev).y;
+
+	// Calculate 10% of distance to next control point
+	ar.x2 = ar.x1 + ((((*back).x) - ar.x1) * 0.3f);
+	ar.y2 = ar.y1 + ((((*back).y) - ar.y1) * 0.3f);
+
+	// Calculate vector from first control point to second control point
+	float x_diff = ar.x2 - ar.x1;
+	float y_diff = ar.y2 - ar.y1;
+
+	float arrow_length = 0.3f;
+	float arrow_width = 0.5f; // 0 to 1
+
+	// Calculate ccw normal of vector
+	ar.x3 = ar.x2 - (y_diff * arrow_length);
+	ar.x3 += (ar.x1 + (x_diff * arrow_length) - ar.x3) * arrow_width;
+
+	ar.y3 = ar.y2 + (x_diff * arrow_length);
+	ar.y3 += (ar.y1 + (y_diff * arrow_length) - ar.y3) * arrow_width;
+
+	// Calculate cw normal of vector
+	ar.x4 = ar.x2 + (y_diff * arrow_length);
+	ar.x4 += (ar.x1 + (x_diff * arrow_length) - ar.x4) * arrow_width;
+
+	ar.y4 = ar.y2 - (x_diff * arrow_length);
+	ar.y4 += (ar.y1 + (y_diff * arrow_length) - ar.y4) * arrow_width;
+
+	arrows.push_back(ar);
+
+	printf("Control Points: %i, getMidpoints() calls: %i\n", control_points.size(), max_recursion);
 	printf("Calculated!\n");
 
 }
@@ -81,12 +118,19 @@ void BezierCurve::draw(float xoff, float yoff)
 {
 	if (!control_points.empty())
 	{
-		for (int i = 0; i < control_points.size(); ++i)
+		for (auto &ar : arrows)
 		{
-			//al_draw_line(control_points[i].x + xoff, control_points[i].y + yoff, control_points[i + 1].x + xoff, control_points[i + 1].y + yoff, al_map_rgb(255, 0, 255), 1);
-
-			al_draw_filled_circle(control_points[i].x + xoff, control_points[i].y + yoff, 2, al_map_rgb(255, 0, 255));
+			al_draw_line(ar.x1 + xoff, ar.y1 + yoff, ar.x2 + xoff, ar.y2 + yoff, al_map_rgb(64, 64, 64), 1);
+			al_draw_line(ar.x2 + xoff, ar.y2 + yoff, ar.x3 + xoff, ar.y3 + yoff, al_map_rgb(64, 64, 64), 1);
+			al_draw_line(ar.x2 + xoff, ar.y2 + yoff, ar.x4 + xoff, ar.y4 + yoff, al_map_rgb(64, 64, 64), 1);
 		}
+
+		/*for (int i = 0; i < control_points.size()-1; ++i)
+		{
+			al_draw_line(control_points[i].x + xoff, control_points[i].y + yoff, control_points[i + 1].x + xoff, control_points[i + 1].y + yoff, al_map_rgb(255, 0, 255), 1);
+
+			//al_draw_filled_circle(control_points[i].x + xoff, control_points[i].y + yoff, 2, al_map_rgb(255, 0, 255));
+		}*/
 	}
 
 	if (!curve_points.empty())

@@ -12,6 +12,11 @@ struct vec2d_f
 	float y;
 };
 
+struct arrow
+{
+	float x1, y1, x2, y2, x3, y3, x4, y4;
+};
+
 class BezierCurve
 {
 public:
@@ -32,5 +37,6 @@ private:
 	int recursion_count;
 
 	std::vector<vec2d_f> control_points;
+	std::vector<arrow> arrows;
 	std::vector<vec2d_f> curve_points;
 };

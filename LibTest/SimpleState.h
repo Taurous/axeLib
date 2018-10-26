@@ -2,8 +2,6 @@
 
 #include <axeLib\AbstractState.h>
 
-#include "BezierCurve.h"
-
 class SimpleState : public axe::AbstractState
 {
 public:
@@ -18,5 +16,5 @@ public:
 	virtual void draw();
 
 private:
-	BezierCurve c;
+
 };

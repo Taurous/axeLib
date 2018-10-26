@@ -15,7 +15,15 @@ DrawEngine::DrawEngine()
 
 DrawEngine::~DrawEngine()
 {
-	
+
+}
+
+void axe::DrawEngine::handleEvents(const ALLEGRO_EVENT & ev)
+{
+	if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+	{
+		m_window.resized();
+	}
 }
 
 Window &DrawEngine::createWindow(int width, int height, std::string title, std::string icon_path, int flags)

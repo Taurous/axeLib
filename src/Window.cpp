@@ -45,8 +45,6 @@ namespace axe
 			m_display_modes.push_back(disp_mode);
 		}
 
-		//printDisplayModes();
-
 		createWindow();
 
 		return *this;
@@ -77,10 +75,10 @@ namespace axe
 			axe::crash("Unable to create display at resolution %ix%i", m_width, m_height);
 		}
 
-		m_width = al_get_display_width(m_display); // Get actual display resoltuion (if created with ALLEGRO_FULLSCREEN_WINDOW, passed in resolution is ignored and window is set to size of desktop)
-		m_height = al_get_display_height(m_display);
+		if (!getFullscreen()) m_width = al_get_display_width(m_display); // Get actual display resoltuion (if created with ALLEGRO_FULLSCREEN_WINDOW, passed in resolution is ignored and window is set to size of desktop)
+		if (!getFullscreen()) m_height = al_get_display_height(m_display);
 	
-		centerWindow();
+		// if (!getFullscreen()) centerWindow();
 
 		setWindowTitle(m_title);
 		setWindowIcon(m_icon_path);
@@ -109,6 +107,31 @@ namespace axe
 		{
 			al_set_window_title(m_display, title.c_str());
 		}
+	}
+
+	void Window::setFullscreen(bool f)
+	{
+		int mask = ~(ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_WINDOWED); // 0b0111111110
+		m_flags = m_flags & mask; // Both fullscreen and windowed flags have been cleared
+
+		if (f)  m_flags = m_flags | ALLEGRO_FULLSCREEN_WINDOW; // Set fullscreen flag
+		else m_flags = m_flags | ALLEGRO_WINDOWED;
+
+		al_unregister_event_source(m_event_queue, al_get_display_event_source(m_display));
+		al_destroy_display(m_display);
+
+		createWindow();
+
+		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
+	}
+
+	void Window::resized()
+	{
+		al_acknowledge_resize(m_display);
+		m_width = al_get_display_width(m_display);
+		m_height = al_get_display_height(m_display);
+
+		al_convert_memory_bitmaps();
 	}
 
 	void Window::registerForEvents(ALLEGRO_EVENT_QUEUE *eq)

@@ -26,13 +26,18 @@ namespace axe
 		void setWindowTitle(std::string title);
 
 		bool getFullscreen() const { return (m_flags & ALLEGRO_FULLSCREEN || m_flags & ALLEGRO_FULLSCREEN_WINDOW); }
+		void setFullscreen(bool flag);
 
-		int getScreenWidth() const { return m_monitor_info.x2 - m_monitor_info.x1; } // Returns size of monitor
-		int getScreenHeight() const { return m_monitor_info.y2 - m_monitor_info.y1; } // Returns size of monitor
+		const int getScreenWidth() const { return m_monitor_info.x2 - m_monitor_info.x1; } // Returns size of monitor
+		const int getScreenHeight() const { return m_monitor_info.y2 - m_monitor_info.y1; } // Returns size of monitor
 
-		int getWindowWidth() const { return m_width; } // Returns size of window, not monitor
-		int getWindowHeight() const { return m_height; } // Returns size of window, not monitor
+		const int getWindowWidth() const { return m_width; } // Returns size of window, (supplies window size before set to fullscreen)
+		const int getWindowHeight() const { return m_height; } // Returns size of window, (supplies window size before set to fullscreen)
+		
+		const int getWidth() const { if (!getFullscreen()) return getWindowWidth(); else return getScreenWidth(); }
+		const int getHeight() const { if (!getFullscreen()) return getWindowHeight(); else return getScreenHeight(); }
 
+		void resized();
 		void registerForEvents(ALLEGRO_EVENT_QUEUE *eq);
 		ALLEGRO_DISPLAY *getAllegroDisplay() { return m_display; }
 

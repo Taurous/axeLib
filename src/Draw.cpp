@@ -1,6 +1,4 @@
-#include "axeLib\DrawEngine.h"
-
-
+#include "axeLib/DrawEngine.h"
 
 namespace axe
 {
@@ -166,7 +164,7 @@ namespace axe
 
 */
 
-	void DrawEngine::flipAndClear(ALLEGRO_COLOR cl)
+	void flipAndClear(ALLEGRO_COLOR cl)
 	{
 		al_flip_display();
 		al_clear_to_color(cl);

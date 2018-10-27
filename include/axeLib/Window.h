@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util\Logger.h"
+#include "axeLib/util/Logger.h"
 #include <allegro5\allegro.h>
 #include <string>
 #include <vector>
@@ -21,6 +21,7 @@ namespace axe
 		~Window();
 
 		Window &create(int width, int height, std::string title, std::string icon_path = "", int flags = ALLEGRO_WINDOWED);
+		void destroy();
 
 		void setWindowIcon(std::string path);
 		void setWindowTitle(std::string title);

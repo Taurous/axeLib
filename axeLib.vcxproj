@@ -39,7 +39,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -74,7 +74,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <SourcePath>$(SolutionDir)src;$(SourcePath)</SourcePath>
     <Allegro_AddonImage>true</Allegro_AddonImage>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
@@ -89,7 +89,7 @@
     <Allegro_AddonVideo>false</Allegro_AddonVideo>
     <Allegro_LibraryType>DynamicDebug</Allegro_LibraryType>
     <OutDir>$(SolutionDir)lib\</OutDir>
-    <TargetName>$(ProjectName)-$(ProjVersion)-debug</TargetName>
+    <TargetName>axeLib_64-debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
@@ -109,13 +109,32 @@
     <OutDir>$(SolutionDir)lib\</OutDir>
     <TargetName>$(ProjectName)-$(ProjVersion)</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)lib\</OutDir>
+    <TargetName>axeLib_64-debug</TargetName>
+    <TargetExt>.lib</TargetExt>
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <SourcePath>$(SolutionDir)src;$(SourcePath)</SourcePath>
+    <Allegro_AddonImage>true</Allegro_AddonImage>
+    <Allegro_AddonTTF>true</Allegro_AddonTTF>
+    <Allegro_AddonPrimitives>true</Allegro_AddonPrimitives>
+    <Allegro_AddonAudio>true</Allegro_AddonAudio>
+    <Allegro_AddonAcodec>true</Allegro_AddonAcodec>
+    <Allegro_AddonPhysfs>false</Allegro_AddonPhysfs>
+    <Allegro_AddonDialog>true</Allegro_AddonDialog>
+    <Allegro_AddonMemfile>false</Allegro_AddonMemfile>
+    <Allegro_AddonFont>true</Allegro_AddonFont>
+    <Allegro_AddonColor>false</Allegro_AddonColor>
+    <Allegro_AddonVideo>false</Allegro_AddonVideo>
+    <Allegro_LibraryType>DynamicDebug</Allegro_LibraryType>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\axeLib\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\axeLib</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -124,6 +143,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -155,14 +175,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\Draw.cpp" />
     <ClCompile Include="src\DrawEngine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\InputHandler.cpp" />
-    <ClCompile Include="src\SimpleObject.cpp" />
     <ClCompile Include="src\StateManager.cpp" />
     <ClCompile Include="src\util\FPS.cpp" />
     <ClCompile Include="src\Window.cpp" />
@@ -170,11 +186,8 @@
   <ItemGroup>
     <ClInclude Include="include\axeLib\AbstractState.h" />
     <ClInclude Include="include\axeLib\DrawEngine.h" />
-    <ClInclude Include="include\axeLib\DrawObjectRef.h" />
     <ClInclude Include="include\axeLib\EventHandler.h" />
-    <ClInclude Include="include\axeLib\GameObject.h" />
     <ClInclude Include="include\axeLib\InputHandler.h" />
-    <ClInclude Include="include\axeLib\SimpleObject.h" />
     <ClInclude Include="include\axeLib\StateManager.h" />
     <ClInclude Include="include\axeLib\util\FPS.h" />
     <ClInclude Include="include\axeLib\util\Logger.h" />
@@ -182,10 +195,11 @@
     <ClInclude Include="include\axeLib\util\Util.h" />
     <ClInclude Include="include\axeLib\Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\lua.redist.5.3.4\build\native\lua.redist.targets" Condition="Exists('packages\lua.redist.5.3.4\build\native\lua.redist.targets')" />
-    <Import Project="packages\lua.5.3.4\build\native\lua.targets" Condition="Exists('packages\lua.5.3.4\build\native\lua.targets')" />
     <Import Project="packages\AllegroDeps.1.7.0.0\build\native\AllegroDeps.targets" Condition="Exists('packages\AllegroDeps.1.7.0.0\build\native\AllegroDeps.targets')" />
     <Import Project="packages\Allegro.5.2.4.0\build\native\Allegro.targets" Condition="Exists('packages\Allegro.5.2.4.0\build\native\Allegro.targets')" />
   </ImportGroup>
@@ -193,8 +207,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\lua.redist.5.3.4\build\native\lua.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\lua.redist.5.3.4\build\native\lua.redist.targets'))" />
-    <Error Condition="!Exists('packages\lua.5.3.4\build\native\lua.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\lua.5.3.4\build\native\lua.targets'))" />
     <Error Condition="!Exists('packages\AllegroDeps.1.7.0.0\build\native\AllegroDeps.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\AllegroDeps.1.7.0.0\build\native\AllegroDeps.targets'))" />
     <Error Condition="!Exists('packages\Allegro.5.2.4.0\build\native\Allegro.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Allegro.5.2.4.0\build\native\Allegro.targets'))" />
   </Target>

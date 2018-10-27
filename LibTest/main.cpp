@@ -1,9 +1,9 @@
-#include <allegro5\allegro.h>
+#include <allegro5/allegro.h>
 
-#include <axeLib\InputHandler.h>
-#include <axeLib\EventHandler.h>
-#include <axeLib\DrawEngine.h>
-#include <axeLib\StateManager.h>
+#include <axeLib/InputHandler.h>
+#include <axeLib/EventHandler.h>
+#include <axeLib/DrawEngine.h>
+#include <axeLib/StateManager.h>
 
 #include "SimpleState.h"
 
@@ -49,6 +49,8 @@ int main(int argc, char ** argv)
 	{
 		if (m_events.handleEvents())
 		{
+			m_draw.handleEvents(m_events.getEvent());
+
 			m_input.getInput(m_events.getEvent());
 
 			m_state.handleEvents();
@@ -74,7 +76,7 @@ int main(int argc, char ** argv)
 
 			m_state.draw();
 
-			m_draw.flipAndClear(al_map_rgb(0, 0, 0));
+			axe::flipAndClear(al_map_rgb(0, 0, 0));
 		}
 
 		m_state.cleanStates();

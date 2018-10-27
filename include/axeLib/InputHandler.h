@@ -3,8 +3,8 @@
 #include <string>
 #include <allegro5/allegro.h>
 
-#include "util\Timer.h" //For timing character deletion
-#include "util\Logger.h"
+#include "axeLib/util/Timer.h" //For timing character deletion
+#include "axeLib/util/Logger.h"
 
 namespace axe
 {

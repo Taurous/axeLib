@@ -4,13 +4,13 @@
 #include <vector>
 #include <memory>
 
-#include "util\Logger.h"
+#include "axeLib/util/Logger.h"
 
-#include "DrawEngine.h"
-#include "InputHandler.h"
-#include "EventHandler.h"
+#include "axeLib/DrawEngine.h"
+#include "axeLib/InputHandler.h"
+#include "axeLib/EventHandler.h"
 
-#include "AbstractState.h"
+#include "axeLib/AbstractState.h"
 
 /*
 *	Note to self, need to remove the ability

@@ -1,9 +1,9 @@
 #pragma once
 
 // Include these or use dispatch (Observer/Events/Command?)
-#include "DrawEngine.h"
-#include "EventHandler.h"
-#include "InputHandler.h"
+#include "axeLib/DrawEngine.h"
+#include "axeLib/EventHandler.h"
+#include "axeLib/InputHandler.h"
 
 namespace axe
 {

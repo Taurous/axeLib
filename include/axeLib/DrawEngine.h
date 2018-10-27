@@ -7,14 +7,14 @@
 #include <vector>
 #include <string>
 
-#include "Window.h"
+#include "axeLib\Window.h"
 
-#include "util\Logger.h"
-
-#include "DrawObjectRef.h"
+#include "axeLib/util/Logger.h"
 
 namespace axe
 {
+	void flipAndClear(ALLEGRO_COLOR cl);
+
 	class DrawEngine
 	{
 	public:
@@ -32,8 +32,6 @@ namespace axe
 
 		Window &createWindow(int width, int height, std::string title, std::string icon_path = "", int flags = ALLEGRO_WINDOWED);
 		Window &getWindow() { return m_window; }
-
-		void flipAndClear(ALLEGRO_COLOR cl);
 
 	private:
 		Window m_window;

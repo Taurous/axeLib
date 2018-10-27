@@ -1,4 +1,4 @@
-#include "axeLib\Window.h"
+#include "axeLib/Window.h"
 
 namespace axe
 {
@@ -49,6 +49,13 @@ namespace axe
 
 		return *this;
 	}
+
+	void Window::destroy()
+	{
+		al_unregister_event_source(m_event_queue, al_get_display_event_source(m_display));
+		al_destroy_display(m_display);
+	}
+
 
 	void Window::printDisplayModes()
 	{
@@ -117,9 +124,7 @@ namespace axe
 		if (f)  m_flags = m_flags | ALLEGRO_FULLSCREEN_WINDOW; // Set fullscreen flag
 		else m_flags = m_flags | ALLEGRO_WINDOWED;
 
-		al_unregister_event_source(m_event_queue, al_get_display_event_source(m_display));
-		al_destroy_display(m_display);
-
+		destroy();
 		createWindow();
 
 		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
@@ -127,9 +132,11 @@ namespace axe
 
 	void Window::resized()
 	{
+		printf("B: %ix%i\n", m_width, m_height);
 		al_acknowledge_resize(m_display);
 		m_width = al_get_display_width(m_display);
 		m_height = al_get_display_height(m_display);
+		printf("A: %ix%i\n", m_width, m_height);
 
 		al_convert_memory_bitmaps();
 	}

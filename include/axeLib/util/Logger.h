@@ -1,6 +1,6 @@
 #pragma once
 
-#include <allegro5\allegro_native_dialog.h>
+#include <allegro5/allegro_native_dialog.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>

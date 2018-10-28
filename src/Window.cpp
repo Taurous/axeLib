@@ -3,15 +3,15 @@
 namespace axe
 {
 	Window::Window()
-		:	m_width(0)
-		,	m_height(0)
-		,	m_title("")
-		,	m_icon_path("")
-		,	m_flags(0)
-		,	m_display(nullptr)
-		,	m_event_queue(nullptr)
-		,	m_icon(nullptr)
-		,	m_current_display_mode(0)
+		: m_width(0)
+		, m_height(0)
+		, m_title("")
+		, m_icon_path("")
+		, m_flags(0)
+		, m_display(nullptr)
+		, m_event_queue(nullptr)
+		, m_icon(nullptr)
+		, m_aspect_ratio(1)
 	{
 		
 	}
@@ -25,13 +25,16 @@ namespace axe
 		m_display = nullptr;
 	}
 
-	Window &Window::create(int width, int height, std::string title, std::string icon_path, int flags)
+	Window &Window::create(int width, int height, ALLEGRO_EVENT_QUEUE *eq, int flags)
 	{
 		m_width = width;
+		m_default_width = width;
 		m_height = height;
-		m_title = title;
-		m_icon_path = icon_path;
+		m_default_height = height;
 		m_flags = flags;
+		m_event_queue = eq;
+
+		m_aspect_ratio = double(m_width) / double(m_height);
 
 		//Removing ability to detect multiple displays for now.
 
@@ -82,16 +85,19 @@ namespace axe
 			axe::crash("Unable to create display at resolution %ix%i", m_width, m_height);
 		}
 
+		if (m_flags & ALLEGRO_MAXIMIZED)
+		{
+			resized();
+			printf("createWindow() -> resized()\n");
+		}
+
+		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
+
 		if (!getFullscreen()) m_width = al_get_display_width(m_display); // Get actual display resoltuion (if created with ALLEGRO_FULLSCREEN_WINDOW, passed in resolution is ignored and window is set to size of desktop)
 		if (!getFullscreen()) m_height = al_get_display_height(m_display);
-	
-		// if (!getFullscreen()) centerWindow();
-
-		setWindowTitle(m_title);
-		setWindowIcon(m_icon_path);
 	}
 
-	void Window::setWindowIcon(std::string path)
+	Window &Window::setWindowIcon(std::string path)
 	{
 		if (m_flags & ALLEGRO_WINDOWED && !path.empty())
 		{
@@ -106,14 +112,18 @@ namespace axe
 				m_icon = nullptr;
 			}
 		}
+
+		return *this;
 	}
 
-	void Window::setWindowTitle(std::string title)
+	Window &Window::setWindowTitle(std::string title)
 	{
 		if (m_flags & ALLEGRO_WINDOWED)
 		{
 			al_set_window_title(m_display, title.c_str());
 		}
+
+		return *this;
 	}
 
 	void Window::setFullscreen(bool f)
@@ -124,27 +134,23 @@ namespace axe
 		if (f)  m_flags = m_flags | ALLEGRO_FULLSCREEN_WINDOW; // Set fullscreen flag
 		else m_flags = m_flags | ALLEGRO_WINDOWED;
 
+		if (m_flags & ALLEGRO_MAXIMIZED)
+		{
+			m_width = m_default_width;
+			m_height = m_default_height;
+		}
+
 		destroy();
 		createWindow();
-
-		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
 	}
 
 	void Window::resized()
 	{
-		printf("B: %ix%i\n", m_width, m_height);
 		al_acknowledge_resize(m_display);
 		m_width = al_get_display_width(m_display);
 		m_height = al_get_display_height(m_display);
-		printf("A: %ix%i\n", m_width, m_height);
 
 		al_convert_memory_bitmaps();
-	}
-
-	void Window::registerForEvents(ALLEGRO_EVENT_QUEUE *eq)
-	{
-		m_event_queue = eq;
-		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
 	}
 
 	void Window::centerWindow(void)

@@ -20,11 +20,11 @@ namespace axe
 
 		~Window();
 
-		Window &create(int width, int height, std::string title, std::string icon_path = "", int flags = ALLEGRO_WINDOWED);
+		Window &create(int width, int height, ALLEGRO_EVENT_QUEUE *eq, int flags = ALLEGRO_WINDOWED);
 		void destroy();
 
-		void setWindowIcon(std::string path);
-		void setWindowTitle(std::string title);
+		Window &setWindowIcon(std::string path);
+		Window &setWindowTitle(std::string title);
 
 		bool getFullscreen() const { return (m_flags & ALLEGRO_FULLSCREEN || m_flags & ALLEGRO_FULLSCREEN_WINDOW); }
 		void setFullscreen(bool flag);
@@ -39,7 +39,7 @@ namespace axe
 		const int getHeight() const { if (!getFullscreen()) return getWindowHeight(); else return getScreenHeight(); }
 
 		void resized();
-		void registerForEvents(ALLEGRO_EVENT_QUEUE *eq);
+
 		ALLEGRO_DISPLAY *getAllegroDisplay() { return m_display; }
 
 		void centerWindow(); // Untested
@@ -63,6 +63,11 @@ namespace axe
 		int m_width;
 		int m_height;
 
-		int m_current_display_mode;
+		int m_default_width;
+		int m_default_height;
+
+		double m_aspect_ratio;
+
+		//int m_current_display_mode;
 	};
 }

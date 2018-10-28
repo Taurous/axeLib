@@ -26,9 +26,9 @@ void axe::DrawEngine::handleEvents(const ALLEGRO_EVENT & ev)
 	}
 }
 
-Window &DrawEngine::createWindow(int width, int height, std::string title, std::string icon_path, int flags)
+Window &DrawEngine::createWindow(int width, int height, ALLEGRO_EVENT_QUEUE *eq, int flags)
 {
-	return m_window.create(width, height, title, icon_path, flags);
+	return m_window.create(width, height, eq, flags);
 }
 
 /*

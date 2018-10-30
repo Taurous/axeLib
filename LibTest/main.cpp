@@ -35,7 +35,7 @@ int main(int argc, char ** argv)
 	axe::DrawEngine m_draw;
 	axe::StateManager m_state;
 
-	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), ALLEGRO_WINDOWED).setWindowTitle("axeLib Test");
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE | ALLEGRO_MAXIMIZED).setWindowTitle("axeLib Test");
 
 	printResolution(m_draw);
 

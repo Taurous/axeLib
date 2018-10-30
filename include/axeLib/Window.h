@@ -66,8 +66,6 @@ namespace axe
 		int m_default_width;
 		int m_default_height;
 
-		double m_aspect_ratio;
-
 		//int m_current_display_mode;
 	};
 }

@@ -105,6 +105,8 @@ namespace axe
 	{
 		if (path.empty()) return *this;
 
+		m_icon_path = path;
+
 		if (m_icon) al_destroy_bitmap(m_icon);
 
 		m_icon = al_load_bitmap(path.c_str());
@@ -122,6 +124,8 @@ namespace axe
 	Window &Window::setWindowTitle(std::string title)
 	{
 		if (title.empty()) return *this;
+
+		m_title = title;
 
 		al_set_window_title(m_display, title.c_str());
 

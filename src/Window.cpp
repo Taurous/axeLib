@@ -94,6 +94,10 @@ namespace axe
 		{
 			resized();
 		}
+		else
+		{
+			centerWindow();
+		}
 
 		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
 

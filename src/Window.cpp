@@ -31,10 +31,9 @@ namespace axe
 		m_flags = flags;
 		m_event_queue = eq;
 
-		//Removing ability to detect multiple displays for now.
-
 		al_get_monitor_info(0, &m_monitor_info); // Get Monitor dimensions
 
+		// Unneeded if not using actual fullscreen.
 		int num_display_modes = al_get_num_display_modes(); // Get number of different display resolutions and bitrates
 		for (int i = 0; i < num_display_modes; ++i)
 		{
@@ -43,7 +42,7 @@ namespace axe
 			m_display_modes.push_back(disp_mode);
 		}
 
-		createWindow();
+		createWindow(); // Actually create the window, internal function
 
 		return *this;
 	}
@@ -71,10 +70,10 @@ namespace axe
 		for (const auto &mode : m_display_modes)
 		{
 			printf("Display Mode %i\n", i);
-			printf("Resolution: %ix%i\n", mode.width, mode.height);
-			printf("Aspect Ratio: %.3f\n", float(mode.width) / float(mode.height));
-			printf("Format: %i\n", mode.format);
-			printf("Refresh Rate: %i\n\n", mode.refresh_rate);
+			printf("\tResolution: %ix%i\n", mode.width, mode.height);
+			printf("\tAspect Ratio: %.3f\n", float(mode.width) / float(mode.height));
+			printf("\tFormat: %i\n", mode.format);
+			printf("\tRefresh Rate: %i\n\n", mode.refresh_rate);
 			++i;
 		}
 	}
@@ -90,19 +89,14 @@ namespace axe
 			axe::crash("Unable to create display at resolution %ix%i", m_width, m_height);
 		}
 
-		if (m_flags & ALLEGRO_MAXIMIZED || m_flags & ALLEGRO_FULLSCREEN_WINDOW)
-		{
-			resized();
-		}
-		else
+		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
+
+		resized(); // Need to resize after creating window in case dimensions are changed by Allegro
+
+		if (!(m_flags & ALLEGRO_MAXIMIZED || m_flags & ALLEGRO_FULLSCREEN_WINDOW))
 		{
 			centerWindow();
 		}
-
-		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
-
-		m_width = al_get_display_width(m_display);
-		m_height = al_get_display_height(m_display);
 	}
 
 	Window &Window::setWindowIcon(std::string path)
@@ -145,7 +139,7 @@ namespace axe
 		else
 		{
 			m_flags = m_flags | ALLEGRO_WINDOWED;
-			m_width = m_default_width;
+			m_width = m_default_width; // Reset window size to default after returning from fullscreen so window doesnt fall off screen.
 			m_height = m_default_height;
 		}
 
@@ -157,15 +151,25 @@ namespace axe
 
 	void Window::resized()
 	{
+		printf("Resizing from %ix%i...\n", m_width, m_height);
 		al_acknowledge_resize(m_display);
 		m_width = al_get_display_width(m_display);
 		m_height = al_get_display_height(m_display);
+		printf("Resized to %ix%i\n", m_width, m_height);
 
 		al_convert_memory_bitmaps();
 	}
 
 	void Window::centerWindow(void)
 	{
-		al_set_window_position(m_display, getScreenWidth() / 2 - m_width / 2, getScreenHeight() / 2 - m_height / 2);
+		int x_pos = getScreenWidth() / 2;
+		x_pos -= getWindowWidth() / 2;
+		x_pos = x_pos > 0 ? x_pos : 0;
+
+		int y_pos = getScreenHeight() / 2;
+		y_pos -= getWindowHeight() / 2;
+		y_pos = y_pos > 0 ? y_pos : 0;
+
+		al_set_window_position(m_display, x_pos, y_pos);
 	}
 }

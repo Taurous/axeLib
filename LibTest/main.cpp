@@ -26,8 +26,8 @@ int main(int argc, char ** argv)
 {
 	// DrawEngine depends on EventHandler 
 
-	const int DEFAULT_WIND_WIDTH = 1280;
-	const int DEFAULT_WIND_HEIGHT = 720;
+	const int DEFAULT_WIND_WIDTH = 1600;
+	const int DEFAULT_WIND_HEIGHT = 900;
 	const double ticksPerSecond = 60.f;
 
 	axe::InputHandler m_input;
@@ -74,6 +74,11 @@ int main(int argc, char ** argv)
 			redraw = false;
 
 			m_state.draw();
+
+			int x2 = m_draw.getWindow().getWidth();
+			int x1 = x2 - 100;
+
+			al_draw_rectangle(x1, 0, x2, 100, al_map_rgb(255, 0, 0), 4);
 
 			axe::flipAndClear(al_map_rgb(0, 0, 0));
 		}

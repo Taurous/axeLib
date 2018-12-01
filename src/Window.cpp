@@ -3,11 +3,12 @@
 namespace axe
 {
 	Window::Window()
-		: m_width(0) , m_default_width(0)
-		, m_height(0) , m_default_height(0)
+		: m_width(0), m_default_width(0)
+		, m_height(0), m_default_height(0)
 		, m_title("")
 		, m_icon_path("")
 		, m_flags(0)
+		, m_fullscreen(false)
 		, m_display(nullptr)
 		, m_event_queue(nullptr)
 		, m_icon(nullptr)
@@ -30,6 +31,8 @@ namespace axe
 		m_default_height = height;
 		m_flags = flags;
 		m_event_queue = eq;
+
+		if (flags & ALLEGRO_FULLSCREEN_WINDOW) m_fullscreen = true;
 
 		al_get_monitor_info(0, &m_monitor_info); // Get Monitor dimensions
 
@@ -91,7 +94,7 @@ namespace axe
 
 		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
 
-		resized(); // Need to resize after creating window in case dimensions are changed by Allegro
+		resized(); // Need to resize after creating window in case dimensions are changed by Allegro (allegro bug)
 
 		if (!(m_flags & ALLEGRO_MAXIMIZED || m_flags & ALLEGRO_FULLSCREEN_WINDOW))
 		{
@@ -132,7 +135,7 @@ namespace axe
 
 	void Window::setFullscreen(bool f)
 	{
-		int mask = ~(ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_WINDOWED); // 0b0111111110
+		/*int mask = ~(ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_WINDOWED); // 0b0111111110
 		m_flags = m_flags & mask; // Both fullscreen and windowed flags have been cleared
 
 		if (f) m_flags = m_flags | ALLEGRO_FULLSCREEN_WINDOW; // Set fullscreen flag
@@ -146,7 +149,10 @@ namespace axe
 		destroy();
 		createWindow();
 
-		setWindowIcon(m_icon_path).setWindowTitle(m_title);
+		setWindowIcon(m_icon_path).setWindowTitle(m_title);*/
+
+		al_toggle_display_flag(m_display, ALLEGRO_FULLSCREEN_WINDOW, f);
+		m_fullscreen = f;
 	}
 
 	void Window::resized()

@@ -66,6 +66,10 @@ int main(int argc, char ** argv)
 			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))
 			{
 				m_draw.getWindow().setFullscreen(!m_draw.getWindow().getFullscreen());
+
+				//ALLEGRO_DISPLAY *disp = m_draw.getWindow().getAllegroDisplay();
+
+				//al_toggle_display_flag(disp, ALLEGRO_FULLSCREEN_WINDOW, !m_draw.getWindow().getFullscreen());
 			}
 		}
 
@@ -80,7 +84,7 @@ int main(int argc, char ** argv)
 
 			al_draw_rectangle(x1, 0, x2, 100, al_map_rgb(255, 0, 0), 4);
 
-			axe::flipAndClear(al_map_rgb(0, 0, 0));
+			axe::flipAndClear(al_map_rgb(64, 64, 64));
 		}
 
 		m_state.cleanStates();

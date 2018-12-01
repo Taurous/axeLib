@@ -26,7 +26,7 @@ namespace axe
 		Window &setWindowIcon(std::string path);
 		Window &setWindowTitle(std::string title);
 
-		bool getFullscreen() const { return (m_flags & ALLEGRO_FULLSCREEN || m_flags & ALLEGRO_FULLSCREEN_WINDOW); }
+		bool getFullscreen() const { return m_fullscreen; }
 		void setFullscreen(bool flag);
 
 		const int getScreenWidth() const { return m_monitor_info.x2 - m_monitor_info.x1; } // Returns size of monitor
@@ -59,6 +59,7 @@ namespace axe
 		std::string m_title;
 		std::string m_icon_path;
 
+		bool m_fullscreen;
 		int m_flags;
 		int m_width;
 		int m_height;

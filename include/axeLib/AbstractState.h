@@ -30,7 +30,6 @@ namespace axe
 
 	protected:
 		StateManager &m_states;
-
 		InputHandler &m_input;
 		EventHandler &m_events;
 		DrawEngine &m_draw;

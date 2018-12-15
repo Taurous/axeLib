@@ -26,9 +26,9 @@ void axe::DrawEngine::handleEvents(const ALLEGRO_EVENT & ev)
 	}
 }
 
-Window &DrawEngine::createWindow(int width, int height, ALLEGRO_EVENT_QUEUE *eq, int flags)
+Window &DrawEngine::createWindow(int width, int height, ALLEGRO_EVENT_QUEUE *eq, bool fullscreen, int flags)
 {
-	return m_window.create(width, height, eq, flags);
+	return m_window.create(width, height, eq, fullscreen, flags);
 }
 
 /*

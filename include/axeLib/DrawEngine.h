@@ -30,7 +30,7 @@ namespace axe
 
 		void handleEvents(const ALLEGRO_EVENT &ev);
 
-		Window &createWindow(int width, int height, ALLEGRO_EVENT_QUEUE *eq, int flags = ALLEGRO_WINDOWED);
+		Window &createWindow(int width, int height, ALLEGRO_EVENT_QUEUE *eq, bool fullscreen, int flags = 0);
 		Window &getWindow() { return m_window; }
 
 	private:

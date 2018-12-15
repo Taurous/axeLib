@@ -1,6 +1,6 @@
 #pragma once
 
-#include <axeLib\AbstractState.h>
+#include <axeLib\StateManager.h>
 #include <vector>
 #include <axeLib/util/Timer.h>
 
@@ -18,12 +18,14 @@ public:
 	virtual void draw();
 
 private:
+	ALLEGRO_BITMAP *back;
 	std::vector<ALLEGRO_BITMAP *> anim;
 	std::vector<ALLEGRO_BITMAP *>::iterator frame;
 	int x, y;
 	int speed_x, speed_y;
 
 	bool facing_right;
+	bool facing_up;
 
 	axe::Timer t;
 };

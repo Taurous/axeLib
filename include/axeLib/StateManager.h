@@ -12,13 +12,6 @@
 
 #include "axeLib/AbstractState.h"
 
-/*
-*	Note to self, need to remove the ability
-*	to pop states until the list is empty.
-
-What the hell did I mean by this?
-*/
-
 namespace axe
 {
 	enum

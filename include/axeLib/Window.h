@@ -20,7 +20,7 @@ namespace axe
 
 		~Window();
 
-		Window &create(int width, int height, ALLEGRO_EVENT_QUEUE *eq, int flags = ALLEGRO_WINDOWED);
+		Window &create(int width, int height, ALLEGRO_EVENT_QUEUE *eq, bool fullscreen, int flags = 0);
 		void destroy();
 
 		Window &setWindowIcon(std::string path);
@@ -47,8 +47,6 @@ namespace axe
 		void printDisplayModes();
 
 	private:
-		void createWindow();
-		
 		ALLEGRO_MONITOR_INFO m_monitor_info;
 		std::vector<ALLEGRO_DISPLAY_MODE> m_display_modes;
 

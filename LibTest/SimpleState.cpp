@@ -42,38 +42,38 @@ void SimpleState::resume() { }
 
 void SimpleState::handleEvents()
 {
-	if (m_input.isKeyDown(ALLEGRO_KEY_LEFT))
+	if (m_input.isKeyDown(ALLEGRO_KEY_A))
 	{
-		speed_x = -6;
-		facing_right = false;
+		speed_x = -200;
 	}
-	else if (m_input.isKeyDown(ALLEGRO_KEY_RIGHT))
+	else if (m_input.isKeyDown(ALLEGRO_KEY_D))
 	{
-		speed_x = 6;
-		facing_right = true;
+		speed_x = 200;
 	}
 	else
 	{
 		speed_x = 0;
 	}
 
-	if (m_input.isKeyDown(ALLEGRO_KEY_UP))
+	if (m_input.isKeyDown(ALLEGRO_KEY_W))
 	{
-		speed_y = -6;
-		facing_up = true;
+		speed_y = -200;
 	}
-	else if (m_input.isKeyDown(ALLEGRO_KEY_DOWN))
+	else if (m_input.isKeyDown(ALLEGRO_KEY_S))
 	{
-		speed_y = 6;
-		facing_up = false;
+		speed_y = 200;
 	}
 	else
 	{
-		facing_up = false;
 		speed_y = 0;
 	}
+
+	if (m_input.getMouseX() > x) facing_right = true;
+	else facing_right = false;
+	if (m_input.getMouseY() > y) facing_up = false;
+	else facing_up = true;
 }
-void SimpleState::update()
+void SimpleState::update(unsigned long long deltaTime)
 {
 	if (t.elapsed().count() > 200)
 	{
@@ -85,8 +85,10 @@ void SimpleState::update()
 		}
 	}
 
-	x += speed_x;
-	y += speed_y;
+	printf("deltaTime = %llu\n", deltaTime);
+
+	x += speed_x * (deltaTime / 1000.f);
+	y += speed_y * (deltaTime / 1000.f);
 }
 void SimpleState::draw()
 {

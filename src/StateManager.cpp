@@ -65,9 +65,9 @@ void StateManager::handleEvents()
 	m_states.back()->handleEvents();
 }
 
-void StateManager::update()
+void StateManager::update(unsigned long long deltaTime)
 {
-	m_states.back()->update();
+	m_states.back()->update(deltaTime);
 }
 
 void StateManager::draw()

@@ -42,7 +42,7 @@ namespace axe
 		void cleanStates();
 
 		void handleEvents();
-		void update();
+		void update(unsigned long long deltaTime);
 		void draw();
 
 		void setDrawAll(bool flag) { m_draw_all = flag; }

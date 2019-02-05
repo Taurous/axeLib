@@ -14,15 +14,15 @@ public:
 	virtual void resume();
 
 	virtual void handleEvents();
-	virtual void update();
+	virtual void update(unsigned long long deltaTime);
 	virtual void draw();
 
 private:
 	ALLEGRO_BITMAP *back;
 	std::vector<ALLEGRO_BITMAP *> anim;
 	std::vector<ALLEGRO_BITMAP *>::iterator frame;
-	int x, y;
-	int speed_x, speed_y;
+	float x, y;
+	float speed_x, speed_y;
 
 	bool facing_right;
 	bool facing_up;

@@ -43,6 +43,9 @@ int main(int argc, char ** argv)
 
 	bool redraw = false;
 
+	axe::Timer t;
+	t.start();
+
 	m_events.startTimer();
 	while (m_state.running())
 	{
@@ -60,7 +63,7 @@ int main(int argc, char ** argv)
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				m_state.update();
+				m_state.update((unsigned long long)t.restart().count());
 				redraw = true;
 			}
 			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))

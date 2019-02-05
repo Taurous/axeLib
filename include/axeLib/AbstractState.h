@@ -25,7 +25,7 @@ namespace axe
 		virtual void resume() = 0;
 
 		virtual void handleEvents() = 0;
-		virtual void update() = 0;
+		virtual void update(unsigned long long deltaTime) = 0;
 		virtual void draw() = 0;
 
 	protected:

@@ -74,6 +74,5 @@ void EventHandler::emitEvent(int type, int field1, int field2, int field3, int f
 	user_event.user.data2 = field2;
 	user_event.user.data3 = field3;
 	user_event.user.data4 = field4;
-
 	al_emit_user_event(&user_event_source, &user_event, NULL);
 }

@@ -3,21 +3,18 @@
 #include <string>
 #include <allegro5/allegro.h>
 
-#include "axeLib/util/Timer.h" //For timing character deletion
-#include "axeLib/util/Logger.h"
-
 namespace axe
 {
 	// Mouse key must be bit field, Allegro limitation
-	const char MOUSE_LEFT	= 0b0001;
-	const char MOUST_RIGHT	= 0b0010;
-	const char MOUSE_MIDDLE	= 0b0100;
+	const char MOUSE_LEFT = 0b0001;
+	const char MOUST_RIGHT = 0b0010;
+	const char MOUSE_MIDDLE = 0b0100;
 
-	const char MOD_IGNORE	= 0b0000; // Ignores modifiers that are pressed (Allowing any modifier to be pressed)
-	const char MOD_NONE		= 0b0001; // Requires that no modifiers be pressed
-	const char MOD_SHIFT	= 0b0010;
-	const char MOD_CTRL		= 0b0100;
-	const char MOD_ALT		= 0b1000;
+	const char MOD_IGNORE = 0b0000; // Ignores modifiers that are pressed (Allowing any modifier to be pressed)
+	const char MOD_NONE = 0b0001; // Requires that no modifiers be pressed
+	const char MOD_SHIFT = 0b0010;
+	const char MOD_CTRL = 0b0100;
+	const char MOD_ALT = 0b1000;
 
 	class InputHandler
 	{

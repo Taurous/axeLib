@@ -3,6 +3,7 @@
 #include <axeLib\StateManager.h>
 #include <vector>
 #include <axeLib/util/Timer.h>
+#include <array>
 
 class SimpleState : public axe::AbstractState
 {
@@ -18,14 +19,12 @@ public:
 	virtual void draw();
 
 private:
-	ALLEGRO_BITMAP *back;
-	std::vector<ALLEGRO_BITMAP *> anim;
-	std::vector<ALLEGRO_BITMAP *>::iterator frame;
-	float x, y;
-	float speed_x, speed_y;
+	ALLEGRO_BITMAP *screen_buffer;
+	int screen_width, screen_height;
 
-	bool facing_right;
-	bool facing_up;
+	std::array<std::array<bool, 10>, 10> world;
 
-	axe::Timer t;
+	float camera_x, camera_y;
+	float camera_d;
+	float fov;
 };

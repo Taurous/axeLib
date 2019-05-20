@@ -35,9 +35,7 @@ int main(int argc, char ** argv)
 	axe::DrawEngine m_draw;
 	axe::StateManager m_state;
 
-	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE).setWindowTitle("axeLib Test").setWindowIcon("back.png");
-
-	printResolution(m_draw);
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE).setWindowTitle("axeLib Test");
 
 	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
 

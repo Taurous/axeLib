@@ -1,15 +1,6 @@
 #pragma once
 
-#include <allegro5\allegro.h>
-#include <allegro5\allegro_image.h>
-#include <allegro5\allegro_primitives.h>
-
-#include <vector>
-#include <string>
-
 #include "axeLib\Window.h"
-
-#include "axeLib/util/Logger.h"
 
 namespace axe
 {

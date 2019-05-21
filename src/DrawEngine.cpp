@@ -1,5 +1,14 @@
 #include "axeLib/DrawEngine.h"
+
+#include <allegro5\allegro.h>
+#include <allegro5\allegro_image.h>
+#include <allegro5\allegro_primitives.h>
+
+#include <vector>
+#include <string>
+
 #include "axeLib/util/Util.h"
+#include "axeLib/util/Logger.h"
 
 using namespace axe;
 

@@ -33,7 +33,7 @@ namespace axe
 		m_event_queue = eq;
 		m_fullscreen = fullscreen;
 
-		al_set_new_display_flags(m_flags); 
+		al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | m_flags);
 
 		al_get_monitor_info(0, &m_monitor_info); // Get Monitor dimensions
 

@@ -7,27 +7,12 @@
 
 #include "SimpleState.h"
 
-#include <vector>
-
-void printResolution(axe::DrawEngine &draw)
-{
-	axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
-		draw.getWindow().getScreenWidth(),
-		draw.getWindow().getScreenHeight()
-	);
-
-	axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
-		draw.getWindow().getWindowWidth(),
-		draw.getWindow().getWindowHeight()
-	);
-}
-
 int main(int argc, char ** argv)
 {
 	// DrawEngine depends on EventHandler 
 
-	const int DEFAULT_WIND_WIDTH = 1600;
-	const int DEFAULT_WIND_HEIGHT = 900;
+	const int DEFAULT_WIND_WIDTH = 600;
+	const int DEFAULT_WIND_HEIGHT = 400;
 	const double ticksPerSecond = 60.f;
 
 	axe::InputHandler m_input;
@@ -38,6 +23,36 @@ int main(int argc, char ** argv)
 	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE).setWindowTitle("axeLib Test");
 
 	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
+
+
+	ALLEGRO_SHADER *test_shader = nullptr;
+	test_shader = al_create_shader(ALLEGRO_SHADER_AUTO);
+
+	if (!al_attach_shader_source_file(test_shader, ALLEGRO_VERTEX_SHADER, "vert.hlsl"))
+	{
+		printf("Vertex Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
+	}
+	else if (!al_build_shader(test_shader))
+	{
+		printf("Build Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
+	}
+	else if (!al_use_shader(test_shader))
+	{
+		printf("Failed to use shader!\n");
+	}
+
+	if (!al_attach_shader_source_file(test_shader, ALLEGRO_PIXEL_SHADER, "shader.hlsl"))
+	{
+		printf("Pixel Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
+	}
+	else if (!al_build_shader(test_shader))
+	{
+		printf("Build Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
+	}
+	else if (!al_use_shader(test_shader))
+	{
+		printf("Failed to use shader!\n");
+	}
 
 	bool redraw = false;
 
@@ -64,30 +79,31 @@ int main(int argc, char ** argv)
 				m_state.update((unsigned long long)t.restart().count());
 				redraw = true;
 			}
-			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))
+			/*else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))
 			{
 				m_draw.getWindow().setFullscreen(!m_draw.getWindow().getFullscreen());
 
 				//ALLEGRO_DISPLAY *disp = m_draw.getWindow().getAllegroDisplay();
 
 				//al_toggle_display_flag(disp, ALLEGRO_FULLSCREEN_WINDOW, !m_draw.getWindow().getFullscreen());
-			}
+			}*/
 		}
 
 		if (m_events.eventQueueEmpty() && redraw)
 		{
 			redraw = false;
 
+			float mouse_x = m_input.getMouseX();
+
+			al_set_shader_float("mouse_x", mouse_x);
+
 			m_state.draw();
-
-			int x2 = m_draw.getWindow().getWidth();
-			int x1 = x2 - 100;
-
-			al_draw_rectangle(x1, 0, x2, 100, al_map_rgb(255, 0, 0), 4);
 
 			axe::flipAndClear(al_map_rgb(64, 64, 64));
 		}
 
 		m_state.cleanStates();
 	}
+
+	al_destroy_shader(test_shader);
 }

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <axeLib\StateManager.h>
-#include <vector>
 #include <axeLib/util/Timer.h>
+
+#include <vector>
 #include <array>
 
 class SimpleState : public axe::AbstractState
@@ -19,12 +20,15 @@ public:
 	virtual void draw();
 
 private:
-	ALLEGRO_BITMAP *screen_buffer;
-	int screen_width, screen_height;
+	static const int world_height = 10;
+	static const int world_width = 10;
 
-	std::array<std::array<bool, 10>, 10> world;
+	ALLEGRO_BITMAP *tileset;
 
-	float camera_x, camera_y;
-	float camera_d;
-	float fov;
+	std::array<std::array<int, world_width>, world_height> world;
+	std::array<std::array<int, world_width>, world_height> world_col;
+
+	int tile_size;
+	int tiles_wide;
+	int tiles_high;
 };

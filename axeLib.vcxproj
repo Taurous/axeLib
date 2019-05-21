@@ -213,6 +213,7 @@
     <ClInclude Include="include\axeLib\util\Logger.h" />
     <ClInclude Include="include\axeLib\util\Timer.h" />
     <ClInclude Include="include\axeLib\util\Util.h" />
+    <ClInclude Include="include\axeLib\util\Vector.h" />
     <ClInclude Include="include\axeLib\Window.h" />
   </ItemGroup>
   <ItemGroup>

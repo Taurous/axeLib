@@ -32,4 +32,17 @@ namespace axe
 		}
 		else return 0;
 	}
+
+	/*void printResolution(axe::DrawEngine &draw)
+	{
+		axe::log(axe::LOGGER_MESSAGE, "Screen Resolution is: %ix%i\n",
+			draw.getWindow().getScreenWidth(),
+			draw.getWindow().getScreenHeight()
+		);
+
+		axe::log(axe::LOGGER_MESSAGE, "Window Resolution is: %ix%i\n",
+			draw.getWindow().getWindowWidth(),
+			draw.getWindow().getWindowHeight()
+		);
+	}*/
 }

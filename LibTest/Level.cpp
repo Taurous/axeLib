@@ -3,9 +3,26 @@
 #include <sstream>
 #include <fstream>
 
-int getTile(World *w, int x, int y, int layer)
+int getTileIndex(World *w, int x, int y, int layer)
 {
-	return (y * w->width + x) + (w->width * w->height * layer);
+	int index = -1;
+
+	if (index < w->height * w->width * w->num_layers)
+	{
+		index = (y * w->width + x) + (w->width * w->height * layer);
+	}
+
+	return index;
+}
+
+void setTile(World *w, int x, int y, int layer, char tile)
+{
+	int t = getTileIndex(w, x, y, layer);
+
+	if (t < w->height * w->width * w->num_layers)
+	{
+		w->tiles[t] = tile;
+	}
 }
 
 World *createWorld(const char *name, int width, int height, short layers, Tilemap *tilemap)
@@ -142,7 +159,7 @@ void saveWorld(World *world)
 	}
 }
 
-void destroyWorld(World *w)
+World *destroyWorld(World *w)
 {
 	if (w)
 	{
@@ -151,6 +168,8 @@ void destroyWorld(World *w)
 
 		delete w;
 	}
+
+	return nullptr;
 }
 
 Tilemap *loadTilemap(std::string file_name, int tile_size, int tiles_wide, int tiles_high)
@@ -175,9 +194,60 @@ Tilemap *loadTilemap(std::string file_name, int tile_size, int tiles_wide, int t
 	return t;
 }
 
-void destroyTilemap(Tilemap *tilemap)
+Tilemap *destroyTilemap(Tilemap *tilemap)
 {
 	if (tilemap->bmp) al_destroy_bitmap(tilemap->bmp);
 
 	delete tilemap;
+
+	return nullptr;
+}
+
+SetTileCommand::SetTileCommand(World *w, int x, int y, int layer, char tile) : Command(),
+world(w), prev_tile(-1), new_tile(-1)
+{
+	index = getTileIndex(world, x, y, layer);
+	new_tile = tile;
+	prev_tile = world->tiles[index];
+
+	redo();
+}
+
+SetTileCommand::~SetTileCommand()
+{
+
+}
+
+void SetTileCommand::redo()
+{
+	world->tiles[index] = new_tile;
+}
+
+void SetTileCommand::undo()
+{
+	world->tiles[index] = prev_tile;
+}
+
+ClearTileCommand::ClearTileCommand(World *w, int x, int y, int layer, char tile) : Command(),
+world(w), prev_tile(-1)
+{
+	index = getTileIndex(world, x, y, layer);
+	prev_tile = world->tiles[index];
+
+	redo();
+}
+
+ClearTileCommand::~ClearTileCommand()
+{
+
+}
+
+void ClearTileCommand::redo()
+{
+	world->tiles[index] = -1;
+}
+
+void ClearTileCommand::undo()
+{
+	world->tiles[index] = prev_tile;
 }

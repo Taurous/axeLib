@@ -5,7 +5,7 @@
 
 using namespace axe;
 
-InputHandler::InputHandler() : m_mod_flags(0)
+InputHandler::InputHandler() : m_mod_flags(axe::MOD_NONE)
 {
 	allegro_init();
 	al_install_keyboard();

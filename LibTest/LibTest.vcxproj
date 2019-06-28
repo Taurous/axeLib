@@ -182,6 +182,7 @@
     <ClCompile Include="TextBox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Command.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="SimpleState.h" />
     <ClInclude Include="TextBox.h" />

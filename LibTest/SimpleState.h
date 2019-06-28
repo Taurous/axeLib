@@ -13,6 +13,14 @@
 #include "Level.h"
 #include "TextBox.h"
 
+struct Camera
+{
+	int x;
+	int y;
+	int halfwidth;
+	int halfheight;
+};
+
 class SimpleState : public axe::AbstractState
 {
 public:
@@ -34,12 +42,13 @@ private:
 	int current_layer;
 	bool draw_grid;
 
-	int camera_x;
-	int camera_y;
-	int camera_halfwidth;
-	int camera_halfheight;
+	Camera cam;
 
 	ALLEGRO_FONT *font;
+	ALLEGRO_FONT *font_small;
 
 	TextBox tbox;
+
+	std::vector<std::unique_ptr<Command>> vCommands_undo;
+	std::vector <std::unique_ptr<Command>> vCommands_redo;
 };

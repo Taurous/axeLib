@@ -21,21 +21,28 @@
     <ClCompile Include="SimpleState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SimpleState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="vert.hlsl">
+    <None Include="Level 1.bin">
       <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="shader.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

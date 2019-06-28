@@ -36,8 +36,12 @@ void InputHandler::getInput(const ALLEGRO_EVENT &ev)
 	m_prev_key_state = m_cur_key_state;
 	al_get_keyboard_state(&m_cur_key_state);
 
+	last_pressed = 0;
+
 	if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
 	{
+		last_pressed = ev.keyboard.keycode;
+
 		// Get Modifiers Pressed
 		switch (ev.keyboard.keycode)
 		{
@@ -84,6 +88,11 @@ void InputHandler::getInput(const ALLEGRO_EVENT &ev)
 
 		if (!m_mod_flags) m_mod_flags = MOD_NONE;
 	}
+}
+
+char InputHandler::getChar() const
+{
+	return last_pressed;
 }
 
 bool InputHandler::isKeyPressed(const int key, const char &mod) const

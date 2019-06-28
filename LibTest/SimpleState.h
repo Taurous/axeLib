@@ -1,10 +1,17 @@
 #pragma once
 
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+
 #include <axeLib\StateManager.h>
 #include <axeLib/util/Timer.h>
 
 #include <vector>
 #include <array>
+
+#include "Level.h"
+#include "TextBox.h"
 
 class SimpleState : public axe::AbstractState
 {
@@ -20,15 +27,19 @@ public:
 	virtual void draw();
 
 private:
-	static const int world_height = 10;
-	static const int world_width = 10;
+	Tilemap *tilemap;
+	World *world;
 
-	ALLEGRO_BITMAP *tileset;
+	int selection;
+	int current_layer;
+	bool draw_grid;
 
-	std::array<std::array<int, world_width>, world_height> world;
-	std::array<std::array<int, world_width>, world_height> world_col;
+	int camera_x;
+	int camera_y;
+	int camera_halfwidth;
+	int camera_halfheight;
 
-	int tile_size;
-	int tiles_wide;
-	int tiles_high;
+	ALLEGRO_FONT *font;
+
+	TextBox tbox;
 };

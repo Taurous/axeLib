@@ -7,7 +7,7 @@ namespace axe
 {
 	// Mouse key must be bit field, Allegro limitation
 	const char MOUSE_LEFT = 0b0001;
-	const char MOUST_RIGHT = 0b0010;
+	const char MOUSE_RIGHT = 0b0010;
 	const char MOUSE_MIDDLE = 0b0100;
 
 	const char MOD_IGNORE = 0b0000; // Ignores modifiers that are pressed (Allowing any modifier to be pressed)
@@ -31,6 +31,8 @@ namespace axe
 
 		void getInput(const ALLEGRO_EVENT &ev);
 
+		char getChar() const;
+
 		bool isKeyPressed(const int key, const char &mod = MOD_IGNORE) const;
 		bool isKeyReleased(const int key, const char &mod = MOD_IGNORE) const;
 		bool isKeyDown(const int key, const char &mod = MOD_IGNORE) const;
@@ -47,6 +49,7 @@ namespace axe
 
 	private:
 		char m_mod_flags;
+		int last_pressed;
 
 		ALLEGRO_KEYBOARD_STATE m_prev_key_state;
 		ALLEGRO_KEYBOARD_STATE m_cur_key_state;

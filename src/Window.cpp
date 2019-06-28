@@ -55,7 +55,7 @@ namespace axe
 
 		al_register_event_source(m_event_queue, al_get_display_event_source(m_display));
 
-		//resized(); // Need to resize after creating window in case dimensions are changed by Allegro (allegro bug)
+		resized(); // Need to resize after creating window in case dimensions are changed by Allegro (allegro bug)
 
 		if (!m_fullscreen)
 		{
@@ -145,10 +145,13 @@ namespace axe
 		m_width = al_get_display_width(m_display);
 		m_height = al_get_display_height(m_display);
 		printf("Resized to %ix%i\n", m_width, m_height);
+
+		al_convert_bitmaps();
 	}
 
 	void Window::centerWindow(void)
 	{
+		if (m_flags | ALLEGRO_FULLSCREEN_WINDOW || m_flags | ALLEGRO_MAXIMIZED) return;
 		int x_pos = getScreenWidth() / 2;
 		x_pos -= getWindowWidth() / 2;
 		x_pos = x_pos > 0 ? x_pos : 0;

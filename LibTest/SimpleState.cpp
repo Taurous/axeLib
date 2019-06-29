@@ -6,7 +6,9 @@
 
 #include <allegro5\allegro_primitives.h>
 
-float scale = 4.f;
+float scale = 6.f;
+int menu_width = 262;
+
 bool redo = false;
 bool undo = false;
 unsigned long long dTime = 0;
@@ -21,6 +23,8 @@ SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, 
 	tilemap = loadTilemap("Dungeon_Tileset.png", 16, 10, 10);
 	world = loadWorld("Level 3.bin", tilemap);
 
+	std::cout << "Tiles: " << world->width << "x" << world->height << std::endl;
+
 	if (!world) axe::crash("Failed to create world!");
 
 	font = al_load_font("C:/Windows/Fonts/arial.ttf", 32, 0);
@@ -29,7 +33,7 @@ SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, 
 
 	cam.x = world->width * tilemap->tile_size * scale / 2.f;
 	cam.y = world->height * tilemap->tile_size * scale / 2.f;
-	cam.halfwidth = draw.getWindow().getWidth() / 2;
+	cam.halfwidth = (draw.getWindow().getWidth() - menu_width) / 2;
 	cam.halfheight = draw.getWindow().getHeight() / 2;
 }
 SimpleState::~SimpleState()
@@ -51,7 +55,7 @@ void SimpleState::handleEvents()
 
 		const ALLEGRO_EVENT ev = m_events.getEvent();
 
-		cam.halfwidth = ev.display.width / 2;
+		cam.halfwidth = (ev.display.width - menu_width) / 2;
 		cam.halfheight = ev.display.height / 2;
 	}
 
@@ -81,8 +85,10 @@ void SimpleState::handleEvents()
 		if (current_layer >= world->num_layers) current_layer = world->num_layers - 1;
 	}
 
-	int ix = m_input.getMouseX() - cam.halfwidth + cam.x;
+	int ix = m_input.getMouseX() - cam.halfwidth + cam.x - menu_width;
 	if (ix > 0) ix /= (tilemap->tile_size * scale); // to correct ex: -0.5 being / to 0.
+
+	if (m_input.getMouseX() <= menu_width) ix = -1;
 
 	int iy = m_input.getMouseY() - cam.halfheight + cam.y;
 	if (iy > 0) iy /= (tilemap->tile_size * scale);
@@ -102,14 +108,12 @@ void SimpleState::handleEvents()
 	}
 	else if (m_input.isMouseDown(axe::MOUSE_LEFT))
 	{
-		int sel_x = (m_input.getMouseX() - 8) / 25;
-		int sel_y = (m_input.getMouseY() - 8) / 25;
+		int sel_x = (m_input.getMouseX() - 6) / 25;
+		int sel_y = (m_input.getMouseY() - 6) / 25;
 
 		if (sel_x >= 0 && sel_x < tilemap->tiles_wide && sel_y >= 0 && sel_y < tilemap->tiles_high)
 		{
 			selection = sel_y * tilemap->tiles_wide + sel_x;
-			ix = -1; // set ix/iy to -1 to ignore parsing the map for the click as the tilemap was clicked.
-			iy = -1;
 		}
 		
 		if (ix >= 0 && ix < world->width && iy >= 0 && iy < world->height && selection != -1)
@@ -187,7 +191,7 @@ void SimpleState::handleEvents()
 		dTime = 0;
 	}
 
-	float p_x = float(cam.x) / (float((world->width * world->tilemap->tile_size) * scale));
+	float p_x = float(cam.x) / (float((world->width * world->tilemap->tile_size) * scale)); // Need to adjust
 	float p_y = float(cam.y) / (float((world->height * world->tilemap->tile_size) * scale));
 
 	if (m_input.isMouseWheelDown())
@@ -262,17 +266,20 @@ void SimpleState::update(unsigned long long deltaTime)
 void SimpleState::draw()
 {
 	// Calculate tile coords under mouse
-	int ix = m_input.getMouseX() - cam.halfwidth + cam.x;
+	int ix = m_input.getMouseX() - cam.halfwidth + cam.x - menu_width;
 	if (ix > 0) ix /= (tilemap->tile_size * scale); // to correct ex: -0.5 being / to 0.
+
+	if (m_input.getMouseX() <= menu_width) ix = -1;
 
 	int iy = m_input.getMouseY() - cam.halfheight + cam.y;
 	if (iy > 0) iy /= (tilemap->tile_size * scale);
 
-	int offset_x = cam.halfwidth - cam.x;
+	// Calulate world offset
+	int offset_x = cam.halfwidth - cam.x + menu_width;
 	int offset_y = cam.halfheight - cam.y;
 
-	int vis_tiles_x = m_draw.getWindow().getWidth() / float(tilemap->tile_size * scale);
-	int vis_tiles_y = m_draw.getWindow().getHeight() / float(tilemap->tile_size * scale);
+	int vis_tiles_x = (cam.halfwidth * 2) / float(tilemap->tile_size * scale);
+	int vis_tiles_y = (cam.halfheight * 2) / float(tilemap->tile_size * scale);
 
 	int start_x, start_y, end_x, end_y;
 
@@ -283,12 +290,14 @@ void SimpleState::draw()
 	end_y = std::min(start_y + vis_tiles_y + 2, world->height);
 
 	al_draw_filled_rectangle(
-		std::max(offset_x, 0),
+		std::max(offset_x, menu_width),
 		std::max(offset_y, 0),
 		std::min(int(offset_x + (tilemap->tile_size * scale * world->width)), m_draw.getWindow().getWidth()),
 		std::min(int(offset_y + (tilemap->tile_size * scale * world->height)), m_draw.getWindow().getHeight()),
 		al_map_rgb(37, 19, 26)
 	);
+
+	al_set_clipping_rectangle(menu_width, 0, m_draw.getWindow().getWidth() - menu_width, m_draw.getWindow().getHeight());
 
 	// Draw tiles
 	al_hold_bitmap_drawing(true);
@@ -368,11 +377,11 @@ void SimpleState::draw()
 	}
 
 	// Draw Selected tile at mouse position and layer number
-	if (ix >= 0 && ix < world->width && iy >= 0 && iy < world->height)
+	if (ix >= 0 && ix < world->width && iy >= 0 && iy < world->height && selection != -1)
 	{
 		int x1, y1, x2, y2;
 
-		x1 = (ix * world->tilemap->tile_size * scale) + cam.halfwidth - cam.x;
+		x1 = (ix * world->tilemap->tile_size * scale) + cam.halfwidth - cam.x + menu_width;
 		x2 = x1 + world->tilemap->tile_size * scale;
 
 		y1 = (iy * world->tilemap->tile_size * scale) + cam.halfheight - cam.y;
@@ -399,13 +408,14 @@ void SimpleState::draw()
 		al_draw_textf(font_small, al_map_rgb(60, 60, 200), x2 - 2, y1, ALLEGRO_ALIGN_RIGHT, "%i", current_layer+1);
 	}
 
+	al_reset_clipping_rectangle();
+	
 	// Draw Tilemap selection box
-	al_draw_filled_rectangle(6, 6, 260, 260, al_map_rgb(70, 70, 70));
-	al_draw_rectangle(6, 6, 260, 260, al_map_rgb(100, 150, 10), 1);
-	al_draw_scaled_bitmap(tilemap->bmp, 0, 0, tilemap->width, tilemap->height, 8, 8, 250, 250, 0);
+	//al_draw_line(menu_width, 0, menu_width, m_draw.getWindow().getHeight(), al_map_rgb(90, 10, 0), 2);
+	al_draw_scaled_bitmap(tilemap->bmp, 0, 0, tilemap->width, tilemap->height, 6, 6, 250, 250, 0);
 
 	// Draw selected tile on tilemap
-	if (selection != -1) al_draw_rectangle(8 + (selection % 10 * 25), 8 + (selection / 10 * 25), 8 + (selection % 10 * 25) + 25, 8 + (selection / 10 * 25) + 25, al_map_rgb(255, 0, 0), 1);
+	if (selection != -1) al_draw_rectangle(6 + (selection % 10 * 25), 6 + (selection / 10 * 25), 6 + (selection % 10 * 25) + 25, 6 + (selection / 10 * 25) + 25, al_map_rgb(255, 0, 0), 1);
 	
 	// Draw Textbox, unnecessary?
 	tbox.draw();

@@ -5,10 +5,12 @@
 
 namespace axe
 {
-	// Mouse key must be bit field, Allegro limitation
-	const char MOUSE_LEFT = 0b0001;
-	const char MOUSE_RIGHT = 0b0010;
-	const char MOUSE_MIDDLE = 0b0100;
+	enum
+	{
+		MOUSE_LEFT = 1,
+		MOUSE_RIGHT = 2,
+		MOUSE_MIDDLE = 3
+	};
 
 	const char MOD_IGNORE = 0b0000; // Ignores modifiers that are pressed (Allowing any modifier to be pressed)
 	const char MOD_NONE = 0b0001; // Requires that no modifiers be pressed

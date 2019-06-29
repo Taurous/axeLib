@@ -12,12 +12,8 @@ int main(int argc, char ** argv)
 {
 	// DrawEngine depends on EventHandler 
 	const int DEFAULT_WIND_WIDTH = 1000;
-	const int DEFAULT_WIND_HEIGHT = 400;
+	const int DEFAULT_WIND_HEIGHT = 600;
 	const double ticksPerSecond = 60.f;
-
-	int player_x = DEFAULT_WIND_WIDTH / 2;
-	int player_y = DEFAULT_WIND_HEIGHT / 2;
-	float light_size = 300.f;
 
 	al_init_font_addon();
 	al_init_ttf_addon();
@@ -27,47 +23,23 @@ int main(int argc, char ** argv)
 	axe::DrawEngine m_draw;
 	axe::StateManager m_state;
 
-	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE | ALLEGRO_MAXIMIZED).setWindowTitle("axeLib Test");
-
-	player_x = m_draw.getWindow().getWidth() / 2;
-	player_y = m_draw.getWindow().getHeight() / 2;
+	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE).setWindowTitle("axeLib Test");
 
 	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
 
-	/*ALLEGRO_SHADER *test_shader = nullptr;
-	test_shader = al_create_shader(ALLEGRO_SHADER_AUTO);
+	ALLEGRO_FONT *fps_font = al_load_font("C:/Windows/Fonts/arial.ttf", 18, 0);
+	unsigned long long aFps[60];
+	int cur_index = 0;
+	float avg_fps = 0.f;
+	int ticks = 0;
 
-	if (!al_attach_shader_source_file(test_shader, ALLEGRO_VERTEX_SHADER, "vert.hlsl"))
-	{
-		printf("Vertex Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
-	}
-	else if (!al_build_shader(test_shader))
-	{
-		printf("Build Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
-	}
-	else if (!al_use_shader(test_shader))
-	{
-		printf("Failed to use shader!\n");
-	}
+	memset(aFps, 0.f, sizeof(unsigned long long) * 60);
 
-	if (!al_attach_shader_source_file(test_shader, ALLEGRO_PIXEL_SHADER, "shader.hlsl"))
-	{
-		printf("Pixel Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
-	}
-	else if (!al_build_shader(test_shader))
-	{
-		printf("Build Shader Error:\n\t%s\n", al_get_shader_log(test_shader));
-	}
-	else if (!al_use_shader(test_shader))
-	{
-		printf("Failed to use shader!\n");
-	}
-
-	al_use_shader(NULL);
-	bool using_shader = false;*/
 	bool redraw = false;
 
 	axe::Timer t;
+	axe::TimePoint last_time = t.now();
+	axe::TimePoint last_frame_time = t.now();
 	t.start();
 
 	m_events.startTimer();
@@ -87,92 +59,58 @@ int main(int argc, char ** argv)
 			}
 			else if (m_events.eventIs(ALLEGRO_EVENT_TIMER))
 			{
-				m_state.update((unsigned long long)t.restart().count());
+				unsigned long long deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(t.now() - last_time).count();
+				last_time = t.now();
+
+				if (ticks > 30)
+				{
+					unsigned long long total = 0;
+					for (int i = 0; i < 60; ++i)
+					{
+						total += aFps[i];
+					}
+
+					avg_fps = float(total) / 60.f;
+
+					avg_fps = 1000.f / avg_fps;
+
+					ticks = 0;
+				}
+
+				m_state.update(deltaTime);
 				redraw = true;
+
+				ticks++;
 			}
 			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))
-			{
-				//using_shader = !using_shader;
-			}
-			else if (m_input.isKeyPressed(ALLEGRO_KEY_W))
-			{
-				light_size += 25.f;
-			}
-			else if (m_input.isKeyPressed(ALLEGRO_KEY_S))
-			{
-				light_size -= 25.f;
-				if (light_size < 25.f) light_size = 25.f;
-			}
-			
-			if (m_input.isKeyDown(ALLEGRO_KEY_RIGHT))
-			{
-				player_x += 22;
-				if (player_x > m_draw.getWindow().getWidth())
-					player_x = m_draw.getWindow().getWidth();
-			}
-			else if (m_input.isKeyDown(ALLEGRO_KEY_LEFT))
-			{
-				player_x -= 22;
-				if (player_x < 0)
-					player_x = 0;
-			}
-			
-			if (m_input.isKeyDown(ALLEGRO_KEY_UP))
-			{
-				player_y -= 22;
-				if (player_y < 0)
-					player_y = 0;
-			}
-			else if (m_input.isKeyDown(ALLEGRO_KEY_DOWN))
-			{
-				player_y += 22;
-				if (player_y > m_draw.getWindow().getHeight())
-					player_y = m_draw.getWindow().getHeight();
-			}
-			/*else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))
 			{
 				m_draw.getWindow().setFullscreen(!m_draw.getWindow().getFullscreen());
 
 				//ALLEGRO_DISPLAY *disp = m_draw.getWindow().getAllegroDisplay();
 
 				//al_toggle_display_flag(disp, ALLEGRO_FULLSCREEN_WINDOW, !m_draw.getWindow().getFullscreen());
-			}*/
+			}
 		}
 
 		if (m_events.eventQueueEmpty() && redraw)
 		{
 			redraw = false;
 
-			/*float width = m_draw.getWindow().getWidth();
-			float height = m_draw.getWindow().getHeight();
+			auto now = t.now();
+			auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_frame_time).count();
+			last_frame_time = now;
 
-			float shader_vals[2];
-			shader_vals[0] = player_x;
-			shader_vals[1] = player_y;
+			aFps[cur_index++] = deltaTime;
 
-			al_set_shader_float_vector("mouse_axes", 2, shader_vals, 1);
-
-			shader_vals[0] = width;
-			shader_vals[1] = height;
-
-			al_set_shader_float_vector("screen_size", 2, shader_vals, 1);
-			al_set_shader_float("light_size", light_size);
-			al_set_shader_float("fade_size", 100.f);*/
+			if (cur_index >= 60) cur_index = 0;
 
 			m_state.draw();
+		
+			al_draw_textf(fps_font, al_map_rgb(255, 255, 255), m_draw.getWindow().getWidth() - 16, 16, ALLEGRO_ALIGN_RIGHT, "FPS: %.1f", avg_fps);
 
-			//al_use_shader(NULL);
-			//al_draw_circle(player_x, player_y, light_size, al_map_rgb(255, 0, 255), 1);
-			//al_draw_circle(player_x, player_y, light_size+100, al_map_rgb(255, 0, 255), 1);
-			
-			//if (using_shader) al_use_shader(test_shader);
-			//else al_use_shader(nullptr);
-
-			axe::flipAndClear(al_map_rgb(37, 19, 26));
+			axe::flipAndClear(al_map_rgb(0, 0, 0));
 		}
 
 		m_state.cleanStates();
 	}
-
-	//al_destroy_shader(test_shader);
 }

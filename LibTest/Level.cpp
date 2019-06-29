@@ -62,15 +62,15 @@ World *loadWorld(std::string file_name, Tilemap *tilemap)
 
 	if (map_file.is_open())
 	{
-		int magic;
-		int version;
-		int f_size;
-		int offset_to_data;
+		int32_t magic;
+		int32_t version;
+		int32_t f_size;
+		int32_t offset_to_data;
 
-		int width;
-		int height;
-		int num_layers;
-		char name[32];
+		int32_t width;
+		int32_t height;
+		int32_t num_layers;
+		int8_t name[32];
 
 		std::streamsize file_size = map_file.tellg();
 		map_file.seekg(0);
@@ -107,9 +107,9 @@ World *loadWorld(std::string file_name, Tilemap *tilemap)
 		map_file.read((char*)&height, sizeof(height));
 		map_file.read((char*)&num_layers, sizeof(num_layers));
 
-		map_file.read(name, sizeof(char)*32);
+		map_file.read((char*)name, sizeof(char)*32);
 
-		world = createWorld(name, width, height, num_layers, tilemap);
+		world = createWorld((char*)name, width, height, num_layers, tilemap);
 
 		map_file.seekg(offset_to_data);
 
@@ -127,16 +127,16 @@ void saveWorld(World *world)
 
 	if (map_file.is_open())
 	{
-		int magic = 0x00455841;
-		int version = 0x00010000;
-		int offset_to_data = 0x80;
-		int file_size = 0;
+		int32_t magic = 0x00455841;
+		int32_t version = 0x00010000;
+		int32_t offset_to_data = 0x80;
+		int32_t file_size = 0;
 		
-		map_file.write((char *)&magic, sizeof(magic));
+		map_file.write((char*)&magic, sizeof(magic));
 
-		map_file.write((char *)&version, sizeof(version));
+		map_file.write((char*)&version, sizeof(version));
 
-		map_file.write((char *)&file_size, sizeof(int)); // 4 Bytes to be filled in with file size;
+		map_file.write((char*)&file_size, sizeof(int32_t)); // 4 Bytes to be filled in with file size;
 		map_file.write((char*)&offset_to_data, sizeof(offset_to_data));
 
 		map_file.write((char *)&world->width, sizeof(world->width));

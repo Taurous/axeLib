@@ -39,9 +39,9 @@ void TextBox::update()
 
 	for (auto it = lines.rbegin(); it != lines.rend(); ++it)
 	{
-		if (t.elapsed() > (*it).timepoint + axe::m_secs(4000))
+		if (t.elapsed() > (*it).timepoint + axe::m_secs(2000))
 		{
-			(*it).alpha -= 0.05f;
+			(*it).alpha -= 0.02f;
 		}
 	}
 

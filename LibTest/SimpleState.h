@@ -15,10 +15,10 @@
 
 struct Camera
 {
-	int x;
-	int y;
-	int halfwidth;
-	int halfheight;
+	float x;
+	float y;
+	float halfwidth;
+	float halfheight;
 };
 
 class SimpleState : public axe::AbstractState

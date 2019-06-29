@@ -11,6 +11,8 @@ InputHandler::InputHandler() : m_mod_flags(axe::MOD_NONE)
 	al_install_keyboard();
 	al_install_mouse();
 
+	axe::log(axe::LOGGER_MESSAGE, "Mouse Setting: %i\n", al_get_mouse_num_buttons());
+
 	al_get_mouse_state(&m_prev_mouse_state);
 	m_cur_mouse_state = m_prev_mouse_state;
 

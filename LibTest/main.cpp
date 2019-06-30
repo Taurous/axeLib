@@ -82,19 +82,12 @@ int main(int argc, char ** argv)
 
 				ticks++;
 			}
-			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE))
-			{
-				m_draw.getWindow().setFullscreen(!m_draw.getWindow().getFullscreen());
-
-				//ALLEGRO_DISPLAY *disp = m_draw.getWindow().getAllegroDisplay();
-
-				//al_toggle_display_flag(disp, ALLEGRO_FULLSCREEN_WINDOW, !m_draw.getWindow().getFullscreen());
-			}
+			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE)) m_draw.getWindow().setFullscreen(!m_draw.getWindow().getFullscreen());
 		}
 
 		if (m_events.eventQueueEmpty() && redraw)
 		{
-			redraw = false;
+			//redraw = false;
 
 			auto now = t.now();
 			auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_frame_time).count();

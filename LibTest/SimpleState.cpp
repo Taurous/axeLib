@@ -6,8 +6,12 @@
 
 #include <allegro5\allegro_primitives.h>
 
-float scale = 6.f;
-int menu_width = 262;
+float scale = 2.f;
+int menu_width = 256;
+
+float tilemap_scale = 1.f;
+int tilemap_offset_x = 6;
+int tilemap_offset_y = 6;
 
 bool redo = false;
 bool undo = false;
@@ -16,14 +20,12 @@ unsigned long long dTime = 0;
 SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, axe::EventHandler & events, axe::DrawEngine & draw)
 	: AbstractState(states, input, events, draw), draw_grid(false),
 	tbox(8, 264, "C:/Windows/Fonts/arial.ttf", 24, al_map_rgb(255, 100, 100)),
-	current_layer(0)
+	current_layer(0), selection(6)
 {
 	srand(time(NULL));
 
 	tilemap = loadTilemap("Dungeon_Tileset.png", 16, 10, 10);
 	world = loadWorld("Level 3.bin", tilemap);
-
-	std::cout << "Tiles: " << world->width << "x" << world->height << std::endl;
 
 	if (!world) axe::crash("Failed to create world!");
 
@@ -35,6 +37,8 @@ SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, 
 	cam.y = world->height * tilemap->tile_size * scale / 2.f;
 	cam.halfwidth = (draw.getWindow().getWidth() - menu_width) / 2;
 	cam.halfheight = draw.getWindow().getHeight() / 2;
+
+	tilemap_scale = float(menu_width - (tilemap_offset_x * 2)) / float(tilemap->width);
 }
 SimpleState::~SimpleState()
 {
@@ -49,15 +53,8 @@ void SimpleState::resume() { }
 
 void SimpleState::handleEvents()
 {
-	if (m_events.eventIs(ALLEGRO_EVENT_DISPLAY_RESIZE))
-	{
-		// Need to remove dependency on Allegro for this in axeLib
-
-		const ALLEGRO_EVENT ev = m_events.getEvent();
-
-		cam.halfwidth = (ev.display.width - menu_width) / 2;
-		cam.halfheight = ev.display.height / 2;
-	}
+	cam.halfwidth = (m_draw.getWindow().getWidth() - menu_width) / 2;
+	cam.halfheight = m_draw.getWindow().getHeight() / 2;
 
 	char pressed = 0;
 	if (pressed = m_input.getChar())
@@ -108,22 +105,30 @@ void SimpleState::handleEvents()
 	}
 	else if (m_input.isMouseDown(axe::MOUSE_LEFT))
 	{
-		int sel_x = (m_input.getMouseX() - 6) / 25;
-		int sel_y = (m_input.getMouseY() - 6) / 25;
+		if (m_input.getMouseX() <= menu_width)
+		{
+			ix = m_input.getMouseX() - tilemap_offset_x;
+			ix /= (float(tilemap_scale) * float(tilemap->tiles_wide));
 
-		if (sel_x >= 0 && sel_x < tilemap->tiles_wide && sel_y >= 0 && sel_y < tilemap->tiles_high)
-		{
-			selection = sel_y * tilemap->tiles_wide + sel_x;
-		}
-		
-		if (ix >= 0 && ix < world->width && iy >= 0 && iy < world->height && selection != -1)
-		{
-			int index = getTileIndex(world, ix, iy, current_layer);
-			if (world->tiles[index] != selection)
+			iy = m_input.getMouseY() - tilemap_offset_y;
+			iy /= (float(tilemap_scale) * float(tilemap->tiles_high));
+			
+			if (ix >= 0 && ix < tilemap->tiles_wide && iy >= 0 && iy < tilemap->tiles_high)
 			{
-				vCommands_undo.push_back(std::unique_ptr<SetTileCommand>(new SetTileCommand(world, ix, iy, current_layer, selection)));
-				
-				if (!vCommands_redo.empty()) vCommands_redo.clear();
+				selection = iy * tilemap->tiles_wide + ix;
+			}
+		}
+		else
+		{
+			if (ix >= 0 && ix < world->width && iy >= 0 && iy < world->height && selection != -1)
+			{
+				int index = getTileIndex(world, ix, iy, current_layer);
+				if (world->tiles[index] != selection)
+				{
+					vCommands_undo.push_back(std::unique_ptr<SetTileCommand>(new SetTileCommand(world, ix, iy, current_layer, selection)));
+
+					if (!vCommands_redo.empty()) vCommands_redo.clear();
+				}
 			}
 		}
 	}
@@ -362,7 +367,7 @@ void SimpleState::draw()
 				else
 				{
 					int xx = tile % tilemap->tiles_wide * tilemap->tile_size;
-					int yy = tile / tilemap->tiles_high * tilemap->tile_size;
+					int yy = tile / tilemap->tiles_wide * tilemap->tile_size;
 					al_draw_tinted_scaled_rotated_bitmap_region(
 						tilemap->bmp, xx, yy,
 						tilemap->tile_size, tilemap->tile_size,
@@ -390,7 +395,7 @@ void SimpleState::draw()
 		if (selection != -1)
 		{
 			int xx = selection % tilemap->tiles_wide;
-			int yy = selection / tilemap->tiles_high;
+			int yy = selection / tilemap->tiles_wide;
 			al_draw_tinted_scaled_rotated_bitmap_region(
 				tilemap->bmp,
 				xx * tilemap->tile_size,
@@ -403,19 +408,26 @@ void SimpleState::draw()
 			);
 		}
 
-		al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(60, 60, 200), 1);
+		al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 255, 255), 1);
 
-		al_draw_textf(font_small, al_map_rgb(60, 60, 200), x2 - 2, y1, ALLEGRO_ALIGN_RIGHT, "%i", current_layer+1);
+		al_draw_textf(font_small, al_map_rgb(255, 255, 255), x2 - 2, y1, ALLEGRO_ALIGN_RIGHT, "%i", current_layer+1);
 	}
 
 	al_reset_clipping_rectangle();
-	
+	al_draw_line(menu_width, 0, menu_width, m_draw.getWindow().getHeight(), al_map_rgb(90, 10, 0), 2);
+
 	// Draw Tilemap selection box
-	//al_draw_line(menu_width, 0, menu_width, m_draw.getWindow().getHeight(), al_map_rgb(90, 10, 0), 2);
-	al_draw_scaled_bitmap(tilemap->bmp, 0, 0, tilemap->width, tilemap->height, 6, 6, 250, 250, 0);
+	al_draw_scaled_bitmap(tilemap->bmp,
+		0, 0, tilemap->width, tilemap->height,
+		tilemap_offset_x, tilemap_offset_y, float(tilemap->width) * tilemap_scale, float(tilemap->height) * tilemap_scale, 0);
 
 	// Draw selected tile on tilemap
-	if (selection != -1) al_draw_rectangle(6 + (selection % 10 * 25), 6 + (selection / 10 * 25), 6 + (selection % 10 * 25) + 25, 6 + (selection / 10 * 25) + 25, al_map_rgb(255, 0, 0), 1);
+	if (selection != -1) al_draw_rectangle(
+		tilemap_offset_x + ((selection % tilemap->tiles_wide) * tilemap->tile_size * tilemap_scale),
+		tilemap_offset_y + ((selection / tilemap->tiles_wide) * tilemap->tile_size * tilemap_scale),
+		tilemap_offset_x + ((selection % tilemap->tiles_wide) * tilemap->tile_size * tilemap_scale) + (tilemap->tile_size * tilemap_scale),
+		tilemap_offset_y + ((selection / tilemap->tiles_wide) * tilemap->tile_size * tilemap_scale) + (tilemap->tile_size * tilemap_scale),
+		al_map_rgb(255, 0, 0), 1);
 	
 	// Draw Textbox, unnecessary?
 	tbox.draw();

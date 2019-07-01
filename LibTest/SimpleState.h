@@ -35,8 +35,7 @@ public:
 	virtual void draw();
 
 private:
-	Tilemap *tilemap;
-	Level level;
+	std::shared_ptr<Level> level;
 
 	int selection;
 	int current_layer;

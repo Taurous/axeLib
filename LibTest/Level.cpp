@@ -1,12 +1,15 @@
 #include "Level.h"
+
 #include <fstream>
 #include <iostream>
+
+#include <assert.h>
 
 constexpr uint64_t RELEASE	= 1;
 constexpr uint64_t MAJOR	= 1;
 constexpr uint64_t MINOR	= 1;
 constexpr auto MAX_LEVEL_NAME = 28; // extension is 4 chars so 28+4 is max size of 32
-constexpr int16_t END_OF_ARRAY = 0xBFFF;
+constexpr int16_t END_OF_ARRAY = int16_t(0xBFFF);
 constexpr uint32_t magic = 0x0a455841;
 
 const inline uint64_t getVersion()
@@ -31,6 +34,23 @@ Level::Level(std::string name, int width, int height, uint8_t layers) :
 
 	tile_array_size = width * height * num_layers;
 }
+/*Level::Level(Level && other)
+{
+	width = other.width;
+	height = other.height;
+
+	num_layers = other.num_layers;
+	tile_array_size = other.tile_array_size;
+
+	tilemap = other.tilemap;
+
+	file_name = std::move(other.file_name);
+	level_name = std::move(other.level_name);
+
+	tile_array = std::move(other.tile_array);
+	collision_array = std::move(other.collision_array);
+
+}*/
 Level::Level() : width(0), height(0), num_layers(0), tile_array_size(0)
 {
 	
@@ -38,7 +58,7 @@ Level::Level() : width(0), height(0), num_layers(0), tile_array_size(0)
 }
 Level::~Level()
 {
-	// destroy stuff
+	if (tilemap.bmp) al_destroy_bitmap(tilemap.bmp);
 }
 
 void Level::save()
@@ -160,6 +180,7 @@ bool Level::load(std::string path)
 		}
 
 		num_layers = uint8_t(tile_array.size() / (width * height));
+		tile_array_size = tile_array.size();
 
 		map_file.close();
 
@@ -169,7 +190,7 @@ bool Level::load(std::string path)
 	return false;
 }
 
-int Level::getTile(int x, int y, int layer)
+const int Level::getTile(int x, int y, int layer) const
 {
 	int index = getIndexFromCoords(x, y, layer);
 
@@ -191,48 +212,78 @@ void Level::setTile(int index, short tile)
 	}
 }
 
-int Level::getIndexFromCoords(int x, int y, int layer)
+const int Level::getIndexFromCoords(int x, int y, int layer) const
 {
 	assert(layer < num_layers);
 
 	return (y * width + x) + (width * height * layer);
 }
 
-Tilemap *loadTilemap(std::string file_name, int tile_size, int tiles_wide, int tiles_high)
+// Tilemap Functions:
+
+bool Level::loadTilemap(std::string path, int tile_size)
 {
-	Tilemap *t = new Tilemap();
+	tilemap.bmp = al_load_bitmap(path.c_str());
+	tilemap.file_name = path;
+	tilemap.tile_size = tile_size;
 
-	t->bmp = al_load_bitmap(file_name.c_str());
-
-	if (!t->bmp)
+	if (tilemap.bmp)
 	{
-		delete t;
-		return nullptr;
+		tilemap.bmp_width = al_get_bitmap_width(tilemap.bmp);
+		tilemap.bmp_height = al_get_bitmap_height(tilemap.bmp);
+
+		tilemap.tiles_wide = tilemap.bmp_width / tile_size;
+		tilemap.tiles_high = tilemap.bmp_height / tile_size;
+
+		tilemap.max_tile = tilemap.tiles_wide * tilemap.tiles_high;
+
+		return true;
 	}
-
-	t->bmp_width = al_get_bitmap_width(t->bmp);
-	t->bmp_height = al_get_bitmap_height(t->bmp);
-
-	t->tile_size = tile_size;
-	t->tiles_wide = tiles_wide;
-	t->tiles_high = tiles_high;
-
-	return t;
+	return false;
 }
 
-Tilemap *destroyTilemap(Tilemap *tilemap)
+void Level::drawTile(int x, int y, short tile, float scale)
 {
-	if (tilemap->bmp) al_destroy_bitmap(tilemap->bmp);
+	if (tile < 0 || tile >= tilemap.max_tile) return;
 
-	delete tilemap;
+	int tile_x = (tile % tilemap.tiles_wide) * tilemap.tile_size;
+	int tile_y = (tile / tilemap.tiles_wide) * tilemap.tile_size;
 
-	return nullptr;
+	al_draw_tinted_scaled_rotated_bitmap_region(
+		tilemap.bmp, tile_x, tile_y,
+		tilemap.tile_size, tilemap.tile_size,
+		al_map_rgb(255, 255, 255),
+		0, 0,
+		x, y,
+		scale, scale, 0.f, 0
+	);
 }
 
-SetTileCommand::SetTileCommand(Level *level, int x, int y, int layer, short tile) :
-	Command(), lv(level), index(lv->getIndexFromCoords(x, y, layer)), prev_tile(lv->getTile(x, y, layer)), new_tile(tile)
+void Level::drawTilemap(int x, int y, float scale)
 {
+	al_draw_scaled_bitmap(tilemap.bmp,
+		0, 0, tilemap.bmp_width, tilemap.bmp_height,
+		x, y, tilemap.bmp_width * scale, tilemap.bmp_height * scale, 0);
+}
+
+// Command Functions:
+
+SetTileCommand::SetTileCommand(std::shared_ptr<Level> level, int x, int y, int layer, short tile) : Command(), new_tile(tile)
+{
+	lv = std::move(level);
+
+	index = lv->getIndexFromCoords(x, y, layer);
+	prev_tile = lv->getTile(x, y, layer);
+
 	redo();
+}
+
+SetTileCommand::SetTileCommand(SetTileCommand && other) : Command()
+{
+	lv = std::move(other.lv);
+	prev_tile = other.prev_tile;
+	new_tile = other.new_tile;
+	index = other.index;
 }
 
 SetTileCommand::~SetTileCommand()
@@ -250,10 +301,21 @@ void SetTileCommand::undo()
 	lv->setTile(index, prev_tile);
 }
 
-ClearTileCommand::ClearTileCommand(Level *level, int x, int y, int layer) :
-	Command(), lv(level), index(lv->getIndexFromCoords(x, y, layer)), prev_tile(lv->getTile(x, y, layer))
+ClearTileCommand::ClearTileCommand(std::shared_ptr<Level> level, int x, int y, int layer) : Command()
 {
+	lv = std::move(level);
+	
+	index = lv->getIndexFromCoords(x, y, layer);
+	prev_tile = lv->getTile(x, y, layer);
+
 	redo();
+}
+
+ClearTileCommand::ClearTileCommand(ClearTileCommand && other)
+{
+	lv = std::move(other.lv);
+	prev_tile = other.prev_tile;
+	index = other.index;
 }
 
 ClearTileCommand::~ClearTileCommand()

@@ -1,7 +1,10 @@
 #pragma once
 
+// Does not support multi-byte filenames
+
 #include <string>
 #include <vector>
+
 #include <allegro5/allegro.h>
 
 #include "Command.h"
@@ -11,13 +14,15 @@ constexpr auto INVALID_TILE = -1;
 struct Tilemap
 {
 	ALLEGRO_BITMAP *bmp;
-	int bmp_width;
-	int bmp_height;
-	int tiles_wide;
-	int tiles_high;
-	int tile_size;
+	unsigned int bmp_width;
+	unsigned int bmp_height;
+	unsigned int tiles_wide;
+	unsigned int tiles_high;
+	unsigned int tile_size;
 
-	std::string tilemap_file_name;
+	int max_tile;
+
+	std::string file_name;
 };
 
 class Level
@@ -29,8 +34,8 @@ public:
 
 	// Delete copy and move constructors
 
-	int getIndexFromCoords(int x, int y, int layer);
-	int getTile(int x, int y, int layer);
+	const int getIndexFromCoords(int x, int y, int layer) const;
+	const int getTile(int x, int y, int layer) const;
 	void setTile(int x, int y, int layer, short tile);
 	void setTile(int index, short tile);
 
@@ -38,15 +43,28 @@ public:
 	void save();
 	void save(std::string path);
 
-	void setTilemap(std::shared_ptr<Tilemap> tmap)
-	{
-		tilemap = std::move(tmap);
-	}
+	const int getWidth() const { return width; } // Width of the level in tiles
+	const int getHeight() const { return height; } // Height of the level in tiles
+	const int getNumLayers() const { return num_layers; }
+	const int getTileArraySize() const { return tile_array_size; }
 
-	int getWidth() { return width; }
-	int getHeight() { return height; }
-	int getNumLayers() { return num_layers; }
-	int getTileArraySize() { return tile_array_size; }
+	const std::string &getName() const { return level_name; }
+	const std::string &getFileName() const { return file_name; }
+
+	//Tilemap Functions
+
+	bool loadTilemap(std::string path, int tile_size);
+	ALLEGRO_BITMAP *getAllegroBitmap() { return tilemap.bmp; }
+
+	void drawTile(int x, int y, short tile, float scale = 1.f);
+	void drawTilemap(int x, int y, float scale = 1.f); // Draw entire tilemap is single bitmap
+
+	const int getTilemapWidth() const { return tilemap.bmp_width; } // Width of the tilemap in pixels
+	const int getTilemapHeight() const { return tilemap.bmp_height; } // Height of the tilemap in pixels
+
+	const int getTileSize() const { return tilemap.tile_size; }
+	const int getTilesWide() const { return tilemap.tiles_wide; } // Width of the tilemap in tiles
+	const int getTilesHigh() const { return tilemap.tiles_high; } // Height of the tilemap in tiles
 
 private:
 	uint16_t width;
@@ -55,7 +73,7 @@ private:
 	uint8_t num_layers;
 	int tile_array_size;
 
-	std::shared_ptr<Tilemap> tilemap;
+	Tilemap tilemap;
 
 	std::string file_name;
 	std::string level_name;
@@ -64,13 +82,11 @@ private:
 	std::vector<bool> collision_array;
 };
 
-Tilemap *loadTilemap(std::string file_name, int tile_size, int tiles_wide, int tiles_high);
-Tilemap *destroyTilemap(Tilemap *tilemap);
-
 class SetTileCommand : public Command
 {
 public:
-	SetTileCommand(Level *level, int x, int y, int layer, short tile);
+	SetTileCommand(std::shared_ptr<Level> level, int x, int y, int layer, short tile);
+	SetTileCommand(SetTileCommand && other);
 	~SetTileCommand();
 
 	void redo();
@@ -81,13 +97,13 @@ private:
 	short new_tile;
 	int index;
 
-	Level *lv;
+	std::shared_ptr<Level> lv;
 };
-
 class ClearTileCommand : public Command
 {
 public:
-	ClearTileCommand(Level *level, int x, int y, int layer);
+	ClearTileCommand(std::shared_ptr<Level> level, int x, int y, int layer);
+	ClearTileCommand(ClearTileCommand && other);
 	~ClearTileCommand();
 
 	void redo();
@@ -97,5 +113,5 @@ private:
 	short prev_tile;
 	int index;
 
-	Level *lv;
+	std::shared_ptr<Level> lv;
 };

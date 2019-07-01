@@ -10,14 +10,12 @@
 #include <axeLib/DrawEngine.h>
 #include <axeLib/StateManager.h>
 
-#include <iostream>
-
-#include "Level.h"
-
-//#include "SimpleState.h"
+#include "SimpleState.h"
 
 int main(int argc, char ** argv)
 {
+	srand(time(NULL));
+
 	// DrawEngine depends on EventHandler 
 	const int DEFAULT_WIND_WIDTH = 1000;
 	const int DEFAULT_WIND_HEIGHT = 600;
@@ -33,7 +31,7 @@ int main(int argc, char ** argv)
 
 	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE).setWindowTitle("axeLib Test");
 
-	//m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
+	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
 
 	ALLEGRO_FONT *fps_font = al_load_font("C:/Windows/Fonts/arial.ttf", 18, 0);
 	const int avg_fps_count = 30;
@@ -50,20 +48,7 @@ int main(int argc, char ** argv)
 	axe::TimePoint last_frame_time = t.now();
 	t.start();
 
-
-	Level lv1("LoadTest", 10, 10, 2);
-	lv1.setTilemap(std::shared_ptr<Tilemap>(loadTilemap("Dungeon_Tilemap.png", 16, 10, 10)));
-
-	lv1.save();
-
-	Level lv2;
-	if (lv2.load("LoadTest.bin"))
-	{
-		std::cout << "Level is " << lv2.getWidth() << "x" << lv2.getHeight() << " tiles." << std::endl;
-		std::cout << "Level is " << lv2.getNumLayers() << " layers" << std::endl;
-	}
-
-	/*m_events.startTimer();
+	m_events.startTimer();
 	while (m_state.running())
 	{
 		if (m_events.handleEvents())
@@ -122,5 +107,5 @@ int main(int argc, char ** argv)
 		}
 
 		m_state.cleanStates();
-	}*/
+	}
 }

@@ -44,11 +44,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Level 1.bin">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Level 3.bin">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

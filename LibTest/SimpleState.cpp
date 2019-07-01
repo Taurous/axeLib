@@ -20,12 +20,12 @@ unsigned long long dTime = 0;
 SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, axe::EventHandler & events, axe::DrawEngine & draw)
 	: AbstractState(states, input, events, draw), draw_grid(false),
 	tbox(8, 264, "C:/Windows/Fonts/arial.ttf", 24, al_map_rgb(255, 100, 100)),
-	current_layer(0), selection(6)
+	current_layer(0), selection(-1)
 {
 	srand(time(NULL));
 
-	tilemap = loadTilemap("Dungeon_Tileset.png", 16, 10, 10);
-	world = loadWorld("Level 3.bin", tilemap);
+	tilemap = loadTilemap("Dungeon_Tileset.png", 8, 20, 20);
+	world = createWorld("test", 10, 10, 1, tilemap);
 
 	if (!world) axe::crash("Failed to create world!");
 
@@ -107,11 +107,11 @@ void SimpleState::handleEvents()
 	{
 		if (m_input.getMouseX() <= menu_width)
 		{
-			ix = m_input.getMouseX() - tilemap_offset_x;
-			ix /= (float(tilemap_scale) * float(tilemap->tiles_wide));
-
+			ix = (m_input.getMouseX() - tilemap_offset_x);
+			ix /= (float(tilemap_scale) * float(tilemap->tile_size));
+			
 			iy = m_input.getMouseY() - tilemap_offset_y;
-			iy /= (float(tilemap_scale) * float(tilemap->tiles_high));
+			iy /= (float(tilemap_scale) * float(tilemap->tile_size));
 			
 			if (ix >= 0 && ix < tilemap->tiles_wide && iy >= 0 && iy < tilemap->tiles_high)
 			{
@@ -125,6 +125,8 @@ void SimpleState::handleEvents()
 				int index = getTileIndex(world, ix, iy, current_layer);
 				if (world->tiles[index] != selection)
 				{
+
+					std::cout << "Selection: " << selection << std::endl;
 					vCommands_undo.push_back(std::unique_ptr<SetTileCommand>(new SetTileCommand(world, ix, iy, current_layer, selection)));
 
 					if (!vCommands_redo.empty()) vCommands_redo.clear();

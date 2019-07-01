@@ -188,8 +188,6 @@
     <ClInclude Include="TextBox.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Level 1.bin" />
-    <None Include="Level 3.bin" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

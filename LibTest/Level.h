@@ -15,16 +15,18 @@ struct Tilemap
 	int tile_size;
 };
 
+// was in the middle of restructuring level.cpp to use uint16
+
 struct World
 {
 	std::string file_name;
 	char *name;
 
-	int width;
-	int height;
+	uint16_t width;
+	uint16_t height;
 
-	short num_layers;
-	char *tiles;
+	uint8_t num_layers;
+	int16_t *tiles;
 
 	Tilemap *tilemap;
 };
@@ -44,15 +46,15 @@ Tilemap *destroyTilemap(Tilemap *tilemap);
 class SetTileCommand : public Command
 {
 public:
-	SetTileCommand(World *w, int x, int y, int layer, char tile);
+	SetTileCommand(World *w, int x, int y, int layer, short tile);
 	~SetTileCommand();
 
 	void redo();
 	void undo();
 
 private:
-	char prev_tile;
-	char new_tile;
+	short prev_tile;
+	short new_tile;
 	int index;
 
 	World *world;
@@ -61,14 +63,14 @@ private:
 class ClearTileCommand : public Command
 {
 public:
-	ClearTileCommand(World *w, int x, int y, int layer, char tile);
+	ClearTileCommand(World *w, int x, int y, int layer, short tile);
 	~ClearTileCommand();
 
 	void redo();
 	void undo();
 
 private:
-	char prev_tile;
+	short prev_tile;
 	int index;
 
 	World *world;

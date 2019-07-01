@@ -28,12 +28,12 @@ int main(int argc, char ** argv)
 	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
 
 	ALLEGRO_FONT *fps_font = al_load_font("C:/Windows/Fonts/arial.ttf", 18, 0);
-	unsigned long long aFps[60];
+	const int avg_fps_count = 30;
+	unsigned long long aFps[avg_fps_count];
 	int cur_index = 0;
 	float avg_fps = 0.f;
-	int ticks = 0;
 
-	memset(aFps, 0.f, sizeof(unsigned long long) * 60);
+	memset(aFps, 0.f, sizeof(unsigned long long) * avg_fps_count);
 
 	bool redraw = false;
 
@@ -62,32 +62,15 @@ int main(int argc, char ** argv)
 				unsigned long long deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(t.now() - last_time).count();
 				last_time = t.now();
 
-				if (ticks > 30)
-				{
-					unsigned long long total = 0;
-					for (int i = 0; i < 60; ++i)
-					{
-						total += aFps[i];
-					}
-
-					avg_fps = float(total) / 60.f;
-
-					avg_fps = 1000.f / avg_fps;
-
-					ticks = 0;
-				}
-
 				m_state.update(deltaTime);
 				redraw = true;
-
-				ticks++;
 			}
 			else if (m_input.isKeyPressed(ALLEGRO_KEY_SPACE)) m_draw.getWindow().setFullscreen(!m_draw.getWindow().getFullscreen());
 		}
 
 		if (m_events.eventQueueEmpty() && redraw)
 		{
-			//redraw = false;
+			redraw = false;
 
 			auto now = t.now();
 			auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_frame_time).count();
@@ -95,7 +78,20 @@ int main(int argc, char ** argv)
 
 			aFps[cur_index++] = deltaTime;
 
-			if (cur_index >= 60) cur_index = 0;
+			if (cur_index >= avg_fps_count)
+			{
+				unsigned long long total = 0;
+				for (int i = 0; i < avg_fps_count; ++i)
+				{
+					total += aFps[i];
+				}
+
+				avg_fps = float(total) / float(avg_fps_count);
+
+				avg_fps = 1000.f / avg_fps;
+
+				cur_index = 0;
+			}
 
 			m_state.draw();
 		

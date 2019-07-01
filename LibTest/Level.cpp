@@ -3,6 +3,8 @@
 #include <sstream>
 #include <fstream>
 
+#include <iostream>
+
 int getTileIndex(World *w, int x, int y, int layer)
 {
 	int index = -1;
@@ -220,6 +222,7 @@ SetTileCommand::~SetTileCommand()
 
 void SetTileCommand::redo()
 {
+	std::cout << "Setting Tile Index " << index << " to tile " << int(new_tile) << std::endl;
 	world->tiles[index] = new_tile;
 }
 

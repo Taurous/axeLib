@@ -20,21 +20,20 @@ unsigned long long dTime = 0;
 SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, axe::EventHandler & events, axe::DrawEngine & draw)
 	: AbstractState(states, input, events, draw), draw_grid(false),
 	tbox(8, 264, "C:/Windows/Fonts/arial.ttf", 24, al_map_rgb(255, 100, 100)),
-	current_layer(0), selection(-1)
+	current_layer(0), selection(-1), level("test", 10, 10, 2)
 {
 	srand(time(NULL));
 
-	tilemap = loadTilemap("Dungeon_Tileset.png", 8, 20, 20);
-	Level = createLevel("test", 10, 10, 1, tilemap);
+	std::shared_ptr<Tilemap> tmap(loadTilemap("Dungeon_Tileset.png", 8, 20, 20));
 
-	if (!Level) axe::crash("Failed to create Level!");
+	level.setTilemap(std::move(tmap));
 
 	font = al_load_font("C:/Windows/Fonts/arial.ttf", 32, 0);
 	font_small = al_load_font("C:/Windows/Fonts/arial.ttf", 18, 0);
 	if (!font || !font_small) axe::crash("Failed to load arial.ttf!");
 
-	cam.x = Level->width * tilemap->tile_size * scale / 2.f;
-	cam.y = Level->height * tilemap->tile_size * scale / 2.f;
+	cam.x = level.width * tilemap->tile_size * scale / 2.f;
+	cam.y = level.height * tilemap->tile_size * scale / 2.f;
 	cam.halfwidth = (draw.getWindow().getWidth() - menu_width) / 2;
 	cam.halfheight = draw.getWindow().getHeight() / 2;
 
@@ -79,7 +78,7 @@ void SimpleState::handleEvents()
 			break;
 		}
 		
-		if (current_layer >= Level->num_layers) current_layer = Level->num_layers - 1;
+		if (current_layer >= level.num_layers) current_layer = level.num_layers - 1;
 	}
 
 	int ix = m_input.getMouseX() - cam.halfwidth + cam.x - menu_width;
@@ -92,10 +91,10 @@ void SimpleState::handleEvents()
 
 	if (m_input.isMouseDown(axe::MOUSE_RIGHT))
 	{
-		if (ix >= 0 && ix < Level->width && iy >= 0 && iy < Level->height)
+		if (ix >= 0 && ix < level.width && iy >= 0 && iy < level.height)
 		{
 			int index = getTileIndex(Level, ix, iy, current_layer);
-			if (Level->tiles[index] != -1)
+			if (level.tiles[index] != -1)
 			{
 				vCommands_undo.push_back(std::unique_ptr<ClearTileCommand>(new ClearTileCommand(Level, ix, iy, current_layer, -1)));
 
@@ -120,10 +119,10 @@ void SimpleState::handleEvents()
 		}
 		else
 		{
-			if (ix >= 0 && ix < Level->width && iy >= 0 && iy < Level->height && selection != -1)
+			if (ix >= 0 && ix < level.width && iy >= 0 && iy < level.height && selection != -1)
 			{
 				int index = getTileIndex(Level, ix, iy, current_layer);
-				if (Level->tiles[index] != selection)
+				if (level.tiles[index] != selection)
 				{
 
 					std::cout << "Selection: " << selection << std::endl;
@@ -149,9 +148,9 @@ void SimpleState::handleEvents()
 
 		Level = loadLevel("Level 3.bin", tilemap);
 
-		if (!Level) axe::crash(std::string("Failed to load map " + Level->file_name).c_str());
+		if (!Level) axe::crash(std::string("Failed to load map " + level.file_name).c_str());
 
-		tbox.insertString(Level->file_name + " loaded!");
+		tbox.insertString(level.file_name + " loaded!");
 
 		vCommands_undo.clear();
 		vCommands_redo.clear();
@@ -159,7 +158,7 @@ void SimpleState::handleEvents()
 	else if (m_input.isKeyPressed(ALLEGRO_KEY_S, axe::MOD_CTRL))
 	{
 		saveLevel(Level);
-		tbox.insertString(Level->file_name + " saved!");
+		tbox.insertString(level.file_name + " saved!");
 	}
 	else if (m_input.isKeyPressed(ALLEGRO_KEY_Z, axe::MOD_CTRL))
 	{
@@ -198,30 +197,30 @@ void SimpleState::handleEvents()
 		dTime = 0;
 	}
 
-	float p_x = float(cam.x) / (float((Level->width * Level->tilemap->tile_size) * scale)); // Need to adjust
-	float p_y = float(cam.y) / (float((Level->height * Level->tilemap->tile_size) * scale));
+	float p_x = float(cam.x) / (float((level.width * level.tilemap->tile_size) * scale)); // Need to adjust
+	float p_y = float(cam.y) / (float((level.height * level.tilemap->tile_size) * scale));
 
 	if (m_input.isMouseWheelDown())
 	{
 		scale -= 0.5f;
 		if (scale < 1.f) scale = 1.f;
 
-		cam.x = (Level->width * Level->tilemap->tile_size) * scale * p_x;
-		cam.y = (Level->height * Level->tilemap->tile_size) * scale * p_y;
+		cam.x = (level.width * level.tilemap->tile_size) * scale * p_x;
+		cam.y = (level.height * level.tilemap->tile_size) * scale * p_y;
 	}
 	else if (m_input.isMouseWheelUp())
 	{
 		scale += 0.5f;
 		if (scale > 10.f) scale = 10.f;
 
-		cam.x = (Level->width * Level->tilemap->tile_size) * scale * p_x;
-		cam.y = (Level->height * Level->tilemap->tile_size) * scale * p_y;
+		cam.x = (level.width * level.tilemap->tile_size) * scale * p_x;
+		cam.y = (level.height * level.tilemap->tile_size) * scale * p_y;
 	}
 	
 	if (m_input.isMousePressed(axe::MOUSE_MIDDLE))
 	{
 		int tile = getTileIndex(Level, ix, iy, current_layer);
-		selection = Level->tiles[tile];
+		selection = level.tiles[tile];
 	}
 }
 void SimpleState::update(unsigned long long deltaTime)
@@ -262,10 +261,10 @@ void SimpleState::update(unsigned long long deltaTime)
 	if (m_input.isKeyDown(ALLEGRO_KEY_W, axe::MOD_NONE)) cam.y -= cam_speed;
 	else if (m_input.isKeyDown(ALLEGRO_KEY_S, axe::MOD_NONE)) cam.y += cam_speed;
 
-	if (cam.x > Level->width * Level->tilemap->tile_size * scale) cam.x = Level->width * Level->tilemap->tile_size * scale;
+	if (cam.x > level.width * level.tilemap->tile_size * scale) cam.x = level.width * level.tilemap->tile_size * scale;
 	else if (cam.x < 0) cam.x = 0;
 
-	if (cam.y > Level->height * Level->tilemap->tile_size * scale) cam.y = Level->height * Level->tilemap->tile_size * scale;
+	if (cam.y > level.height * level.tilemap->tile_size * scale) cam.y = level.height * level.tilemap->tile_size * scale;
 	else if (cam.y < 0) cam.y = 0;
 
 	tbox.update();
@@ -293,14 +292,14 @@ void SimpleState::draw()
 	start_x = std::max(int((cam.x - cam.halfwidth) / (tilemap->tile_size * scale)), 0);
 	start_y = std::max(int((cam.y - cam.halfheight) / (tilemap->tile_size * scale)), 0);
 
-	end_x = std::min(start_x + vis_tiles_x + 2, Level->width);
-	end_y = std::min(start_y + vis_tiles_y + 2, Level->height);
+	end_x = std::min(start_x + vis_tiles_x + 2, level.width);
+	end_y = std::min(start_y + vis_tiles_y + 2, level.height);
 
 	al_draw_filled_rectangle(
 		std::max(offset_x, menu_width),
 		std::max(offset_y, 0),
-		std::min(int(offset_x + (tilemap->tile_size * scale * Level->width)), m_draw.getWindow().getWidth()),
-		std::min(int(offset_y + (tilemap->tile_size * scale * Level->height)), m_draw.getWindow().getHeight()),
+		std::min(int(offset_x + (tilemap->tile_size * scale * level.width)), m_draw.getWindow().getWidth()),
+		std::min(int(offset_y + (tilemap->tile_size * scale * level.height)), m_draw.getWindow().getHeight()),
 		al_map_rgb(37, 19, 26)
 	);
 
@@ -308,9 +307,9 @@ void SimpleState::draw()
 
 	// Draw tiles
 	al_hold_bitmap_drawing(true);
-	for (int i = 0; i <= Level->num_layers; ++i)
+	for (int i = 0; i <= level.num_layers; ++i)
 	{
-		if (i == Level->num_layers && !draw_grid) break;
+		if (i == level.num_layers && !draw_grid) break;
 		else
 		{
 			//clip edges?
@@ -320,7 +319,7 @@ void SimpleState::draw()
 		{
 			for (int x = start_x; x < end_x; ++x)
 			{
-				if (i == Level->num_layers && draw_grid)
+				if (i == level.num_layers && draw_grid)
 				{
 					int xx, yy;
 
@@ -351,7 +350,7 @@ void SimpleState::draw()
 				}
 
 				int tile = getTileIndex(Level, x, y, i);
-				tile = Level->tiles[tile];
+				tile = level.tiles[tile];
 
 				if (tile == -1 && i == 0)
 				{
@@ -384,15 +383,15 @@ void SimpleState::draw()
 	}
 
 	// Draw Selected tile at mouse position and layer number
-	if (ix >= 0 && ix < Level->width && iy >= 0 && iy < Level->height && selection != -1)
+	if (ix >= 0 && ix < level.width && iy >= 0 && iy < level.height && selection != -1)
 	{
 		int x1, y1, x2, y2;
 
-		x1 = (ix * Level->tilemap->tile_size * scale) + cam.halfwidth - cam.x + menu_width;
-		x2 = x1 + Level->tilemap->tile_size * scale;
+		x1 = (ix * level.tilemap->tile_size * scale) + cam.halfwidth - cam.x + menu_width;
+		x2 = x1 + level.tilemap->tile_size * scale;
 
-		y1 = (iy * Level->tilemap->tile_size * scale) + cam.halfheight - cam.y;
-		y2 = y1 + Level->tilemap->tile_size * scale;
+		y1 = (iy * level.tilemap->tile_size * scale) + cam.halfheight - cam.y;
+		y2 = y1 + level.tilemap->tile_size * scale;
 
 		if (selection != -1)
 		{

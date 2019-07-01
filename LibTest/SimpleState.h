@@ -36,7 +36,7 @@ public:
 
 private:
 	Tilemap *tilemap;
-	Level *Level;
+	Level level;
 
 	int selection;
 	int current_layer;

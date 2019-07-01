@@ -1,66 +1,34 @@
 #include "Level.h"
-
-#include <sstream>
 #include <fstream>
-
 #include <iostream>
 
-int getTileIndex(World *w, int x, int y, int layer)
-{
-	int index = -1;
+constexpr auto VERSION = 0x00020000;
 
-	if (index < w->height * w->width * w->num_layers)
+Level::Level(std::string name, int width, int height, uint8_t layers) :
+	tile_array(width * height * layers, INVALID_TILE)
+{
+	file_name = name + ".bin";
+	level_name = name;
+
+	this->width = width;
+	this->height = height;
+	this->num_layers = layers;
+
+	tile_array_size = width * height * num_layers;
+
+	std::cout << "Array size: " << tile_array.size() << std::endl;
+
+	for (auto &t : tile_array)
 	{
-		index = (y * w->width + x) + (w->width * w->height * layer);
+		if (t != INVALID_TILE) std::cout << "Data was not set correctly!\n";
 	}
 
-	return index;
+	std::cout << std::endl;
 }
 
-void setTile(World *w, int x, int y, int layer, char tile)
+Level::Level(std::string path)
 {
-	int t = getTileIndex(w, x, y, layer);
-
-	if (t < w->height * w->width * w->num_layers)
-	{
-		w->tiles[t] = tile;
-	}
-}
-
-World *createWorld(const char *name, int width, int height, short layers, Tilemap *tilemap)
-{
-	World *world;
-
-	world = new World();
-
-	std::stringstream ss;
-	ss << std::string(name) << ".bin";
-	world->file_name = ss.str();
-
-	world->name = new char[32];
-	memcpy(world->name, name, 32);
-
-	world->width = width;
-	world->height = height;
-
-	world->num_layers = layers;
-
-	world->tilemap = tilemap;
-
-	std::size_t world_size = width * height * layers;
-
-	world->tiles = new char[world_size];
-
-	memset(world->tiles, -1, world_size);
-
-	return world;
-}
-
-World *loadWorld(std::string file_name, Tilemap *tilemap)
-{
-	World *world = nullptr;
-
-	std::ifstream map_file(file_name, std::ios::binary|std::ios::ate);
+	std::ifstream map_file(file_name, std::ios::binary | std::ios::ate);
 
 	if (map_file.is_open())
 	{
@@ -69,10 +37,10 @@ World *loadWorld(std::string file_name, Tilemap *tilemap)
 		int32_t f_size;
 		int32_t offset_to_data;
 
-		int32_t width;
-		int32_t height;
-		int32_t num_layers;
-		int8_t name[32];
+		int16_t width;
+		int16_t height;
+		int8_t num_layers;
+		std::string name;
 
 		std::streamsize file_size = map_file.tellg();
 		map_file.seekg(0);
@@ -88,7 +56,7 @@ World *loadWorld(std::string file_name, Tilemap *tilemap)
 
 		map_file.read((char*)&version, 4);
 
-		if (version != 0x00010000)
+		if (version != VERSION)
 		{
 			// log, version mismatch
 			map_file.close();
@@ -109,47 +77,72 @@ World *loadWorld(std::string file_name, Tilemap *tilemap)
 		map_file.read((char*)&height, sizeof(height));
 		map_file.read((char*)&num_layers, sizeof(num_layers));
 
-		map_file.read((char*)name, sizeof(char)*32);
+		map_file.read((char*)name, sizeof(char) * 32);
 
-		world = createWorld((char*)name, width, height, num_layers, tilemap);
+		lv = createLevel((char*)name, width, height, num_layers, tilemap);
 
 		map_file.seekg(offset_to_data);
 
-		map_file.read(world->tiles, sizeof(char) * width * height * num_layers);
+		map_file.read((char*)lv->tiles, sizeof(char) * width * height * num_layers);
 
 		map_file.close();
 	}
-	
-	return world;
+
 }
 
-void saveWorld(World *world)
+int Level::getIndexFromCoords(int x, int y, int layer)
 {
-	std::ofstream map_file(world->file_name, std::ios::binary|std::ios::trunc);
+	int index = INVALID_TILE;
+
+	if (layer < num_layers)
+	{
+		index = (y * width + x) + (width * height * layer);
+	}
+
+	return index;
+}
+void setTile(Level *w, int x, int y, int layer, int16_t tile)
+{
+	int t = getTileIndex(w, x, y, layer);
+
+	if (t >= 0 && t < w->tile_array_size)
+	{
+		w->tile_array[t] = tile;
+	}
+}
+
+void saveLevel(Level *lv)
+{
+	std::ofstream map_file(lv->file_name, std::ios::binary|std::ios::trunc);
 
 	if (map_file.is_open())
 	{
-		int32_t magic = 0x00455841;
-		int32_t version = 0x00010000;
-		int32_t offset_to_data = 0x80;
+		int32_t magic = 0x00455841; // = "AXE\0"
+		int32_t version = VERSION;
+		int32_t offset_to_data = 0xC4;
 		int32_t file_size = 0;
 		
-		map_file.write((char*)&magic, sizeof(magic));
+		map_file << magic;
+		//map_file.write((char*)&magic, sizeof(magic));
 
-		map_file.write((char*)&version, sizeof(version));
+		map_file << version;
+		//map_file.write((char*)&version, sizeof(version));
 
-		map_file.write((char*)&file_size, sizeof(int32_t)); // 4 Bytes to be filled in with file size;
-		map_file.write((char*)&offset_to_data, sizeof(offset_to_data));
+		map_file << file_size << offset_to_data;
+		//map_file.write((char*)&file_size, sizeof(file_size)); // 4 Bytes to be filled in with file size;
+		//map_file.write((char*)&offset_to_data, sizeof(offset_to_data));
 
-		map_file.write((char *)&world->width, sizeof(world->width));
-		map_file.write((char *)&world->height, sizeof(world->height));
-		map_file.write((char *)&world->num_layers, sizeof(int));
+		map_file << lv->width << lv->height << lv->num_layers;
+		//map_file.write((char *)&lv->width, sizeof(lv->width));
+		//map_file.write((char *)&lv->height, sizeof(lv->height));
+		//map_file.write((char *)&lv->num_layers, sizeof(int));
 
-		map_file.write(world->name, sizeof(char)*32);
+		map_file << lv->level_name.size() << lv->level_name;
+		//map_file.write(lv->name, sizeof(char) * name_size);
 
 		map_file.seekp(offset_to_data);
 
-		map_file.write(world->tiles, sizeof(char) * (world->width * world->height * world->num_layers));
+		map_file.write((char*)lv->tiles, sizeof(int16_t) * lv->tile_array_size);
 
 		file_size = map_file.tellp();
 
@@ -161,12 +154,11 @@ void saveWorld(World *world)
 	}
 }
 
-World *destroyWorld(World *w)
+Level *destroyLevel(Level *w)
 {
 	if (w)
 	{
 		delete[] w->tiles;
-		delete[] w->name;
 
 		delete w;
 	}
@@ -205,12 +197,12 @@ Tilemap *destroyTilemap(Tilemap *tilemap)
 	return nullptr;
 }
 
-SetTileCommand::SetTileCommand(World *w, int x, int y, int layer, char tile) : Command(),
-world(w), prev_tile(-1), new_tile(-1)
+SetTileCommand::SetTileCommand(Level *w, int x, int y, int layer, char tile) : Command(),
+Level(w), prev_tile(-1), new_tile(-1)
 {
-	index = getTileIndex(world, x, y, layer);
+	index = getTileIndex(Level, x, y, layer);
 	new_tile = tile;
-	prev_tile = world->tiles[index];
+	prev_tile = Level->tiles[index];
 
 	redo();
 }
@@ -223,19 +215,19 @@ SetTileCommand::~SetTileCommand()
 void SetTileCommand::redo()
 {
 	std::cout << "Setting Tile Index " << index << " to tile " << int(new_tile) << std::endl;
-	world->tiles[index] = new_tile;
+	Level->tiles[index] = new_tile;
 }
 
 void SetTileCommand::undo()
 {
-	world->tiles[index] = prev_tile;
+	Level->tiles[index] = prev_tile;
 }
 
-ClearTileCommand::ClearTileCommand(World *w, int x, int y, int layer, char tile) : Command(),
-world(w), prev_tile(-1)
+ClearTileCommand::ClearTileCommand(Level *w, int x, int y, int layer, char tile) : Command(),
+Level(w), prev_tile(-1)
 {
-	index = getTileIndex(world, x, y, layer);
-	prev_tile = world->tiles[index];
+	index = getTileIndex(Level, x, y, layer);
+	prev_tile = Level->tiles[index];
 
 	redo();
 }
@@ -247,10 +239,10 @@ ClearTileCommand::~ClearTileCommand()
 
 void ClearTileCommand::redo()
 {
-	world->tiles[index] = -1;
+	Level->tiles[index] = -1;
 }
 
 void ClearTileCommand::undo()
 {
-	world->tiles[index] = prev_tile;
+	Level->tiles[index] = prev_tile;
 }

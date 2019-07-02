@@ -268,6 +268,8 @@ void Level::drawTilemap(int x, int y, float scale)
 
 // Command Functions:
 
+int Command::command_count = 0;
+
 SetTileCommand::SetTileCommand(std::shared_ptr<Level> level, int x, int y, int layer, short tile) : Command(), new_tile(tile)
 {
 	lv = std::move(level);

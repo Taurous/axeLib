@@ -89,7 +89,16 @@ void SimpleState::handleEvents()
 	bool mouse_in_level;
 	mouse_in_level = ix >= 0 && ix < level->getWidth() && iy >= 0 && iy < level->getHeight();
 
-	if (m_input.isMouseDown(axe::MOUSE_RIGHT) && mouse_in_level)
+	if (m_input.isMousePressed(axe::MOUSE_LEFT) && !m_input.isMouseDown(axe::MOUSE_RIGHT))
+	{
+		Command::incrementCommandCounter();
+	}
+	else if (m_input.isMousePressed(axe::MOUSE_RIGHT) && !m_input.isMouseDown(axe::MOUSE_LEFT))
+	{
+		Command::incrementCommandCounter();
+	}
+
+	if (m_input.isMouseDown(axe::MOUSE_RIGHT) && mouse_in_level) // pressing mouse right while holding mouse left cause
 	{
 		if (level->getTile(ix, iy, current_layer) != INVALID_TILE)
 		{
@@ -155,9 +164,16 @@ void SimpleState::handleEvents()
 	{
 		if (!vCommands_undo.empty() && !redo)
 		{
-			vCommands_undo.back()->undo();
-			vCommands_redo.push_back(std::move(vCommands_undo.back()));
-			vCommands_undo.pop_back();
+			int id = vCommands_undo.back()->getID();
+
+			while (vCommands_undo.back()->getID() == id)
+			{
+				vCommands_undo.back()->undo();
+				vCommands_redo.push_back(std::move(vCommands_undo.back()));
+				vCommands_undo.pop_back();
+
+				if (vCommands_undo.empty()) break;
+			}
 
 			tbox.insertString("Undo");
 		}
@@ -168,9 +184,16 @@ void SimpleState::handleEvents()
 	{
 		if (!vCommands_redo.empty() && !undo)
 		{
-			vCommands_redo.back()->redo();
-			vCommands_undo.push_back(std::move(vCommands_redo.back()));
-			vCommands_redo.pop_back();
+			int id = vCommands_redo.back()->getID();
+
+			while (vCommands_redo.back()->getID() == id)
+			{
+				vCommands_redo.back()->redo();
+				vCommands_undo.push_back(std::move(vCommands_redo.back()));
+				vCommands_redo.pop_back();
+
+				if (vCommands_redo.empty()) break;
+			}
 
 			tbox.insertString("Redo");
 		}
@@ -226,9 +249,16 @@ void SimpleState::update(unsigned long long deltaTime)
 		{
 			if (!vCommands_undo.empty())
 			{
-				vCommands_undo.back()->undo();
-				vCommands_redo.push_back(std::move(vCommands_undo.back()));
-				vCommands_undo.pop_back();
+				int id = vCommands_undo.back()->getID();
+
+				while (vCommands_undo.back()->getID() == id)
+				{
+					vCommands_undo.back()->undo();
+					vCommands_redo.push_back(std::move(vCommands_undo.back()));
+					vCommands_undo.pop_back();
+
+					if (vCommands_undo.empty()) break;
+				}
 
 				tbox.insertString("Undo");
 			}
@@ -237,9 +267,16 @@ void SimpleState::update(unsigned long long deltaTime)
 		{
 			if (!vCommands_redo.empty())
 			{
-				vCommands_redo.back()->redo();
-				vCommands_undo.push_back(std::move(vCommands_redo.back()));
-				vCommands_redo.pop_back();
+				int id = vCommands_redo.back()->getID();
+
+				while (vCommands_redo.back()->getID() == id)
+				{
+					vCommands_redo.back()->redo();
+					vCommands_undo.push_back(std::move(vCommands_redo.back()));
+					vCommands_redo.pop_back();
+
+					if (vCommands_redo.empty()) break;
+				}
 
 				tbox.insertString("Redo");
 			}

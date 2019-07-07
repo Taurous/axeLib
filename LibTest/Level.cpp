@@ -30,9 +30,14 @@ Level::Level(std::string name, int width, int height, uint8_t layers) :
 
 	this->width = width;
 	this->height = height;
+	
+	assert(layers <= 9);
+
 	this->num_layers = layers;
 
 	tile_array_size = width * height * num_layers;
+
+	tilemap.bmp = nullptr;
 }
 /*Level::Level(Level && other)
 {
@@ -223,6 +228,12 @@ const int Level::getIndexFromCoords(int x, int y, int layer) const
 
 bool Level::loadTilemap(std::string path, int tile_size)
 {
+	if (tilemap.bmp)
+	{
+		al_destroy_bitmap(tilemap.bmp);
+		tilemap.bmp = nullptr;
+	}
+
 	tilemap.bmp = al_load_bitmap(path.c_str());
 	tilemap.file_name = path;
 	tilemap.tile_size = tile_size;

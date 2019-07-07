@@ -7,7 +7,8 @@
 #include <allegro5\allegro_primitives.h>
 
 float scale = 2.f;
-int menu_width = 180;
+constexpr auto MIN_MENU_WIDTH = 256;
+int menu_width;
 
 float tilemap_scale = 1.f;
 int tilemap_offset_x = 6;
@@ -17,13 +18,18 @@ bool redo = false;
 bool undo = false;
 unsigned long long dTime = 0;
 
+int calcMenuWidth(int min_width, int screen_width)
+{
+	return std::max(min_width, int(screen_width * 0.1f));
+}
+
 SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, axe::EventHandler & events, axe::DrawEngine & draw)
 	: AbstractState(states, input, events, draw), draw_grid(false),
 	tbox(8, 264, "C:/Windows/Fonts/arial.ttf", 24, al_map_rgb(255, 100, 100)),
 	current_layer(0), selection(-1)
 {
-	level = std::make_shared<Level>("test", 10, 10, 2);
-	if (!level->loadTilemap("Dungeon_Tileset.png", 16))
+	level = std::make_shared<Level>("test", 10, 10, 3);
+	if (!level->loadTilemap("E:/Downloads/Dungeon_Tileset.png", 32))
 	{
 		std::cout << "Failed to load tilemap!" << std::endl;
 	}
@@ -32,12 +38,14 @@ SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, 
 	font_small = al_load_font("C:/Windows/Fonts/arial.ttf", 18, 0);
 	if (!font || !font_small) axe::crash("Failed to load arial.ttf!");
 
+	menu_width = calcMenuWidth(MIN_MENU_WIDTH, m_draw.getWindow().getWidth());
+	tilemap_scale = float(menu_width - (tilemap_offset_x * 2)) / level->getTilemapWidth();
+
 	cam.x = level->getWidth() * level->getTileSize() * scale / 2.f;
 	cam.y = level->getHeight() * level->getTileSize() * scale / 2.f;
 	cam.halfwidth = (draw.getWindow().getWidth() - menu_width) / 2;
 	cam.halfheight = draw.getWindow().getHeight() / 2;
 
-	tilemap_scale = float(menu_width - (tilemap_offset_x * 2)) / level->getTilemapWidth();
 }
 SimpleState::~SimpleState()
 {
@@ -49,33 +57,20 @@ void SimpleState::resume() { }
 
 void SimpleState::handleEvents()
 {
+	menu_width = calcMenuWidth(MIN_MENU_WIDTH, m_draw.getWindow().getWidth());
+	tilemap_scale = float(menu_width - (tilemap_offset_x * 2)) / level->getTilemapWidth();
+
 	cam.halfwidth = (m_draw.getWindow().getWidth() - menu_width) / 2;
 	cam.halfheight = m_draw.getWindow().getHeight() / 2;
 
 	char pressed = 0;
 	if (pressed = m_input.getChar())
 	{
-		switch (pressed)
-		{
-		case ALLEGRO_KEY_1:
-		case ALLEGRO_KEY_PAD_1:
-			current_layer = 0;
-			break;
-		case ALLEGRO_KEY_2:
-		case ALLEGRO_KEY_PAD_2:
-			current_layer = 1;
-			break;
-		case ALLEGRO_KEY_3:
-		case ALLEGRO_KEY_PAD_3:
-			current_layer = 2;
-			break;
-		case ALLEGRO_KEY_4:
-		case ALLEGRO_KEY_PAD_4:
-			current_layer = 3;
-			break;
-		}
-		
-		if (current_layer >= level->getNumLayers()) current_layer = level->getNumLayers() - 1;
+		if (pressed >= ALLEGRO_KEY_PAD_0) pressed -= ALLEGRO_KEY_PAD_0;
+		else if (pressed >= ALLEGRO_KEY_0) pressed -= ALLEGRO_KEY_0;
+		pressed--;
+
+		if (pressed < level->getNumLayers() && pressed >= 0) current_layer = pressed;
 	}
 
 	int ix = m_input.getMouseX() - cam.halfwidth + cam.x - menu_width;
@@ -162,21 +157,7 @@ void SimpleState::handleEvents()
 	}
 	else if (m_input.isKeyPressed(ALLEGRO_KEY_Z, axe::MOD_CTRL))
 	{
-		if (!vCommands_undo.empty() && !redo)
-		{
-			int id = vCommands_undo.back()->getID();
-
-			while (vCommands_undo.back()->getID() == id)
-			{
-				vCommands_undo.back()->undo();
-				vCommands_redo.push_back(std::move(vCommands_undo.back()));
-				vCommands_undo.pop_back();
-
-				if (vCommands_undo.empty()) break;
-			}
-
-			tbox.insertString("Undo");
-		}
+		doUndo();
 
 		if (!redo) undo = true;
 	}
@@ -209,6 +190,10 @@ void SimpleState::handleEvents()
 	{
 		redo = false;
 		dTime = 0;
+	}
+	else if (m_input.isKeyPressed(ALLEGRO_KEY_R))
+	{
+		level->loadTilemap("tileset.png", 16);
 	}
 
 	float p_x = float(cam.x) / (float((level->getWidth() * level->getTileSize()) * scale));
@@ -245,24 +230,7 @@ void SimpleState::update(unsigned long long deltaTime)
 
 	if (dTime >= 500)
 	{
-		if (undo)
-		{
-			if (!vCommands_undo.empty())
-			{
-				int id = vCommands_undo.back()->getID();
-
-				while (vCommands_undo.back()->getID() == id)
-				{
-					vCommands_undo.back()->undo();
-					vCommands_redo.push_back(std::move(vCommands_undo.back()));
-					vCommands_undo.pop_back();
-
-					if (vCommands_undo.empty()) break;
-				}
-
-				tbox.insertString("Undo");
-			}
-		}
+		if (undo) doUndo();
 		else if (redo)
 		{
 			if (!vCommands_redo.empty())
@@ -436,4 +404,27 @@ void SimpleState::draw()
 	
 	// Draw Textbox, unnecessary?
 	tbox.draw();
+}
+
+void SimpleState::doUndo()
+{
+	if (!vCommands_undo.empty())
+	{
+		int id = vCommands_undo.back()->getID();
+
+		while (vCommands_undo.back()->getID() == id)
+		{
+			vCommands_undo.back()->undo();
+			vCommands_redo.push_back(std::move(vCommands_undo.back()));
+			vCommands_undo.pop_back();
+
+			if (vCommands_undo.empty()) break;
+		}
+
+		tbox.insertString("Undo");
+	}
+}
+void SimpleState::doRedo()
+{
+
 }

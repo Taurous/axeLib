@@ -35,6 +35,9 @@ public:
 	virtual void draw();
 
 private:
+	void doUndo();
+	void doRedo();
+
 	std::shared_ptr<Level> level;
 
 	int selection;

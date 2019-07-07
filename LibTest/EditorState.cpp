@@ -1,4 +1,4 @@
-#include "SimpleState.h"
+#include "EditorState.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -18,17 +18,19 @@ bool redo = false;
 bool undo = false;
 unsigned long long dTime = 0;
 
+int counter = 0;
+
 int calcMenuWidth(int min_width, int screen_width)
 {
 	return std::max(min_width, int(screen_width * 0.1f));
 }
 
-SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, axe::EventHandler & events, axe::DrawEngine & draw)
+EditorState::EditorState(axe::StateManager & states, axe::InputHandler & input, axe::EventHandler & events, axe::DrawEngine & draw)
 	: AbstractState(states, input, events, draw), draw_grid(false),
-	tbox(8, 264, "C:/Windows/Fonts/arial.ttf", 24, al_map_rgb(255, 100, 100)),
+	tbox(8, 400, "C:/Windows/Fonts/arial.ttf", 24, al_map_rgb(255, 100, 100)),
 	current_layer(0), selection(-1)
 {
-	level = std::make_shared<Level>("test", 10, 10, 3);
+	level = std::make_shared<Level>("The Great Expanse", 10, 10, 3);
 	if (!level->loadTilemap("E:/Downloads/Dungeon_Tileset.png", 32))
 	{
 		std::cout << "Failed to load tilemap!" << std::endl;
@@ -45,17 +47,16 @@ SimpleState::SimpleState(axe::StateManager & states, axe::InputHandler & input, 
 	cam.y = level->getHeight() * level->getTileSize() * scale / 2.f;
 	cam.halfwidth = (draw.getWindow().getWidth() - menu_width) / 2;
 	cam.halfheight = draw.getWindow().getHeight() / 2;
-
 }
-SimpleState::~SimpleState()
+EditorState::~EditorState()
 {
 	al_destroy_font(font);
 }
 
-void SimpleState::pause() { }
-void SimpleState::resume() { }
+void EditorState::pause() { }
+void EditorState::resume() { }
 
-void SimpleState::handleEvents()
+void EditorState::handleEvents()
 {
 	menu_width = calcMenuWidth(MIN_MENU_WIDTH, m_draw.getWindow().getWidth());
 	tilemap_scale = float(menu_width - (tilemap_offset_x * 2)) / level->getTilemapWidth();
@@ -127,7 +128,11 @@ void SimpleState::handleEvents()
 		}
 	}
 
-	if (m_input.isKeyPressed(ALLEGRO_KEY_C))
+	if (m_input.isKeyPressed(ALLEGRO_KEY_C, axe::MOD_CTRL))
+	{
+		level->clear();
+	}
+	else if (m_input.isKeyPressed(ALLEGRO_KEY_C))
 	{
 		selection = -1;
 	}
@@ -137,13 +142,11 @@ void SimpleState::handleEvents()
 	}
 	else if (m_input.isKeyPressed(ALLEGRO_KEY_L))
 	{
-		if (!level->load(level->getFileName()))				/// If this fails the previously loaded world will could have corrupt data !!! ///
+		std::string path = "levels/level3.bin";
+
+		if (level->load(path))				/// If this fails the previously loaded world will could have corrupt data !!! ///
 		{
-			axe::crash(std::string("Failed to load map " + level->getFileName()).c_str());
-		}
-		else
-		{
-			tbox.insertString(level->getFileName() + " loaded!");
+			tbox.insertString(path + " loaded!");
 
 			vCommands_undo.clear();
 			vCommands_redo.clear();
@@ -151,9 +154,11 @@ void SimpleState::handleEvents()
 	}
 	else if (m_input.isKeyPressed(ALLEGRO_KEY_S, axe::MOD_CTRL))
 	{
-		level->save();
+		std::string path = "levels/level" + std::to_string(++counter) + ".bin";
 
-		tbox.insertString(level->getFileName() + " saved!");
+		level->save(path);
+
+		tbox.insertString("Saved to " + path);
 	}
 	else if (m_input.isKeyPressed(ALLEGRO_KEY_Z, axe::MOD_CTRL))
 	{
@@ -222,7 +227,7 @@ void SimpleState::handleEvents()
 		if (tile != INVALID_TILE) selection = tile;
 	}
 }
-void SimpleState::update(unsigned long long deltaTime)
+void EditorState::update(unsigned long long deltaTime)
 {
 	float cam_speed = (deltaTime / 1000.f * 400.f) * (0.5f * scale);
 
@@ -265,7 +270,7 @@ void SimpleState::update(unsigned long long deltaTime)
 
 	tbox.update();
 }
-void SimpleState::draw()
+void EditorState::draw()
 {
 	float tileSz = level->getTileSize();
 
@@ -406,7 +411,7 @@ void SimpleState::draw()
 	tbox.draw();
 }
 
-void SimpleState::doUndo()
+void EditorState::doUndo()
 {
 	if (!vCommands_undo.empty())
 	{
@@ -424,7 +429,7 @@ void SimpleState::doUndo()
 		tbox.insertString("Undo");
 	}
 }
-void SimpleState::doRedo()
+void EditorState::doRedo()
 {
 
 }

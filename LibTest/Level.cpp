@@ -18,15 +18,12 @@ const inline uint64_t getVersion()
 }
 
 Level::Level(std::string name, int width, int height, uint8_t layers) :
-	tile_array(width * height * layers, INVALID_TILE), collision_array(width * height, false)
+	tile_array(width * height * layers, INVALID_TILE), collision_array(width * height, false), name(name)
 {
 	while (name.size() > MAX_LEVEL_NAME)
 	{
 		name.pop_back();
 	}
-
-	file_name = name + ".bin";
-	level_name = name;
 
 	this->width = width;
 	this->height = height;
@@ -66,9 +63,9 @@ Level::~Level()
 	if (tilemap.bmp) al_destroy_bitmap(tilemap.bmp);
 }
 
-void Level::save()
+void Level::save(std::string path)
 {
-	std::ofstream map_file(file_name, std::ios::binary | std::ios::trunc);
+	std::ofstream map_file(path, std::ios::binary | std::ios::trunc);
 
 	if (map_file.is_open())
 	{
@@ -85,11 +82,11 @@ void Level::save()
 		map_file.write((char*)&width, sizeof(width));
 		map_file.write((char*)&height, sizeof(height));
 
-		size_t name_size = level_name.size();
+		size_t name_size = name.size();
 
 		map_file.write((char*)&name_size, sizeof(size_t));
 
-		for (auto &c : level_name)
+		for (auto &c : name)
 		{
 			map_file.write(&c, sizeof(c));
 		}
@@ -112,15 +109,9 @@ void Level::save()
 		map_file.close();
 	}
 }
-void Level::save(std::string path)
-{
 
-}
 bool Level::load(std::string path)
 {
-	tile_array.clear();
-	collision_array.clear();
-
 	std::ifstream map_file(path, std::ios::binary | std::ios::ate);
 
 	if (map_file.is_open())
@@ -139,6 +130,7 @@ bool Level::load(std::string path)
 		if (file_magic != magic)
 		{
 			// log, file type unknown
+			axe::log(axe::LOGGER_MESSAGE, "Failed to load level '%s', file type mismatch.\n", path.c_str());
 			map_file.close();
 			return false;
 		}
@@ -148,6 +140,7 @@ bool Level::load(std::string path)
 		if (version != getVersion())
 		{
 			// log, version mismatch
+			axe::log(axe::LOGGER_MESSAGE, "Failed to load level '%s', version mismatch.\n", path.c_str());
 			map_file.close();
 			return false;
 		}
@@ -157,9 +150,12 @@ bool Level::load(std::string path)
 		if (file_size != size)
 		{
 			// log, size wrong, file edited?
+			axe::log(axe::LOGGER_MESSAGE, "Failed to load level '%s', file corrupted.\n", path.c_str());
 			map_file.close();
 			return false;
 		}
+
+		// File is valid! Reset previous level object and reconstruct with new file.
 
 		map_file.read((char*)&offset_to_data, sizeof(offset_to_data));
 		map_file.read((char*)&width, sizeof(width));
@@ -170,10 +166,11 @@ bool Level::load(std::string path)
 		char buffer[MAX_LEVEL_NAME+1];
 		map_file.read(buffer, string_size);
 		buffer[string_size] = '\0';
-		level_name = std::string(buffer);
+		name = std::string(buffer);
+
+		clear();
 
 		map_file.seekg(offset_to_data); // Seek to level array data
-
 		while (true)
 		{
 			int16_t t;
@@ -192,6 +189,7 @@ bool Level::load(std::string path)
 		return true;
 	}
 
+	axe::log(axe::LOGGER_MESSAGE, "Failed to load level '%s', file does not exist.\n", path.c_str());
 	return false;
 }
 
@@ -214,6 +212,17 @@ void Level::setTile(int index, short tile)
 	if (index >= 0 && index < tile_array_size)
 	{
 		tile_array[index] = tile;
+	}
+}
+void Level::clear()
+{
+	for (auto &t : tile_array)
+	{
+		t = INVALID_TILE;
+	}
+	for (auto &&c : collision_array)
+	{
+		c = false;
 	}
 }
 

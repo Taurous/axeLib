@@ -24,7 +24,7 @@
     <ClCompile Include="TextBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SimpleState.cpp">
+    <ClCompile Include="EditorState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +38,7 @@
     <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SimpleState.h">
+    <ClInclude Include="EditorState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

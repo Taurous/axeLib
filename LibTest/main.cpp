@@ -10,7 +10,7 @@
 #include <axeLib/DrawEngine.h>
 #include <axeLib/StateManager.h>
 
-#include "SimpleState.h"
+#include "EditorState.h"
 
 int main(int argc, char ** argv)
 {
@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
 
 	m_draw.createWindow(DEFAULT_WIND_WIDTH, DEFAULT_WIND_HEIGHT, m_events.getEventQueue(), false, ALLEGRO_RESIZABLE).setWindowTitle("axeLib Test");
 
-	m_state.changeState(std::unique_ptr<axe::AbstractState>(new SimpleState(m_state, m_input, m_events, m_draw)));
+	m_state.changeState(std::unique_ptr<axe::AbstractState>(new EditorState(m_state, m_input, m_events, m_draw)));
 
 	ALLEGRO_FONT *fps_font = al_load_font("C:/Windows/Fonts/arial.ttf", 18, 0);
 	const int avg_fps_count = 30;

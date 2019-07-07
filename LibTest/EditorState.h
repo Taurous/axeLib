@@ -21,11 +21,11 @@ struct Camera
 	float halfheight;
 };
 
-class SimpleState : public axe::AbstractState
+class EditorState : public axe::AbstractState
 {
 public:
-	SimpleState(axe::StateManager &states, axe::InputHandler &input, axe::EventHandler &events, axe::DrawEngine &draw);
-	~SimpleState();
+	EditorState(axe::StateManager &states, axe::InputHandler &input, axe::EventHandler &events, axe::DrawEngine &draw);
+	~EditorState();
 
 	virtual void pause();
 	virtual void resume();

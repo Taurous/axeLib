@@ -7,6 +7,8 @@
 
 #include <allegro5/allegro.h>
 
+#include <axeLib/util/Logger.h>
+
 #include "Command.h"
 
 constexpr auto INVALID_TILE = -1;
@@ -40,16 +42,12 @@ public:
 	void setTile(int index, short tile);
 
 	bool load(std::string path);
-	void save();
 	void save(std::string path);
 
 	const int getWidth() const { return width; } // Width of the level in tiles
 	const int getHeight() const { return height; } // Height of the level in tiles
 	const int getNumLayers() const { return num_layers; }
 	const int getTileArraySize() const { return tile_array_size; }
-
-	const std::string &getName() const { return level_name; }
-	const std::string &getFileName() const { return file_name; }
 
 	//Tilemap Functions
 
@@ -66,6 +64,10 @@ public:
 	const int getTilesWide() const { return tilemap.tiles_wide; } // Width of the tilemap in tiles
 	const int getTilesHigh() const { return tilemap.tiles_high; } // Height of the tilemap in tiles
 
+	const std::string &getName() const { return name; }
+
+	void clear();
+
 private:
 	uint16_t width;
 	uint16_t height;
@@ -74,9 +76,7 @@ private:
 	int tile_array_size;
 
 	Tilemap tilemap;
-
-	std::string file_name;
-	std::string level_name;
+	std::string name;
 
 	std::vector<int16_t> tile_array;
 	std::vector<bool> collision_array;

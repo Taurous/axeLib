@@ -5,13 +5,10 @@
 
 using namespace axe;
 
-InputHandler::InputHandler() : m_mod_flags(axe::MOD_NONE)
+InputHandler::InputHandler() : m_mod_flags(axe::MOD_NONE), last_pressed(NULL)
 {
-	allegro_init();
 	al_install_keyboard();
 	al_install_mouse();
-
-	axe::log(axe::LOGGER_MESSAGE, "Mouse Setting: %i\n", al_get_mouse_num_buttons());
 
 	al_get_mouse_state(&m_prev_mouse_state);
 	m_cur_mouse_state = m_prev_mouse_state;
@@ -32,18 +29,16 @@ InputHandler::~InputHandler()
 
 void InputHandler::getInput(const ALLEGRO_EVENT &ev)
 {
+	last_pressed = NULL;
+	
 	m_prev_mouse_state = m_cur_mouse_state;
 	al_get_mouse_state(&m_cur_mouse_state);
 
 	m_prev_key_state = m_cur_key_state;
 	al_get_keyboard_state(&m_cur_key_state);
 
-	last_pressed = 0;
-
 	if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
 	{
-		last_pressed = ev.keyboard.keycode;
-
 		// Get Modifiers Pressed
 		switch (ev.keyboard.keycode)
 		{
@@ -89,6 +84,12 @@ void InputHandler::getInput(const ALLEGRO_EVENT &ev)
 		};
 
 		if (!m_mod_flags) m_mod_flags = MOD_NONE;
+	}
+
+	// Catch unicode key pressed
+	else if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+	{
+		last_pressed = ev.keyboard.unichar;
 	}
 }
 

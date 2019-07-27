@@ -50,8 +50,8 @@ namespace axe
 		bool isMouseInWindow() const;
 
 	private:
+		char last_pressed;
 		char m_mod_flags;
-		int last_pressed;
 
 		ALLEGRO_KEYBOARD_STATE m_prev_key_state;
 		ALLEGRO_KEYBOARD_STATE m_cur_key_state;
